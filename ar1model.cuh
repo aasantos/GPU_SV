@@ -1,6 +1,17 @@
 #ifndef ar1model_cuh
 #define ar1model_cuh
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <cuda.h>
+#include "vector.cuh"
+#include "random.cuh"
+#include "normalmodel.cuh"
+#include "regmodel.cuh"
+
 template <typename T>
 class AR1Model{
 protected:
