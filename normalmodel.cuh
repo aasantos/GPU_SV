@@ -6,7 +6,7 @@
 #include <time.h>
 #include <math.h>
 #include <cuda.h>
-#include "vect.cuh"
+#include "vector.cuh"
 #include "random.cuh"
 
 template <typename T>
