@@ -1,6 +1,16 @@
 #ifndef regmodel_cuh
 #define regmodel_cuh
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <cuda.h>
+#include "vector.cuh"
+#include "random.cuh"
+#include "normalmodel.cuh"
+
 template <typename T>
 class RegModel{
 protected:
