@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <cuda.h>
+#include "vect.cuh"
+#include "random.cuh"
 
 template <typename T>
 class NormalModel{
