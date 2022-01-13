@@ -1,6 +1,18 @@
 #ifndef dlmmodel_cuh
 #define dlmmodel_cuh
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <cuda.h>
+#include "vector.cuh"
+#include "random.cuh"
+#include "normalmodel.cuh"
+#include "regmodel.cuh"
+#include "ar1model.cuh"
+
 template <typename T>
 class DLMModel{
 protected:
