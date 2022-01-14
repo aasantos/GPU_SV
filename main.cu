@@ -11,6 +11,7 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 #include "dlm.cuh"
+#include "runfunc.cuh"
 //
 //
 //
