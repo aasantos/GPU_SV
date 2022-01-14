@@ -11,8 +11,9 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 #include "dlm.cuh"
-
-
+//
+//
+//
 int main()
 {
   printf("Hello from GPU_DLM\n");
