@@ -24,6 +24,7 @@ template <typename T>
 class DLMModel{
 protected:
     //
+    //
     T *x;
     unsigned int n;
     T *alpha;
@@ -49,6 +50,7 @@ protected:
     //
     unsigned int seed;
     Random<T> *random;
+    //
     //
 public:
     __host__ __device__ DLMModel(T *x,unsigned int n,T sigmav,T mu,T phi,T sigma)
