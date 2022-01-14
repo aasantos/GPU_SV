@@ -1,5 +1,5 @@
 #ifndef random_cuh
-#define random_cun
+#define random_cuh
 
 #include <stdio.h>
 #include <stdlib.h>
