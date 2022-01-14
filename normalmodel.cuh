@@ -21,6 +21,11 @@ protected:
     bool mudiffuse;
     bool sigmadiffuse;
     //
+    /*
+    mupriortype are the normal (0) and the beta(1)
+    the beta may need to be used in the regmodel or ar1model
+    to assume that the parameter is between 0 and 1
+    */
     int mupriortype;
     //
     T muprior[2];
