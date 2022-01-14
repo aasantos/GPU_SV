@@ -13,6 +13,13 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 
+
+/*
+model 
+y(t) = alpha(t) + sigmav*err
+alpha(t+1) = mu + phi*(alpha(t) - mu) + sigma+err
+*/
+
 template <typename T>
 class DLMModel{
 protected:
