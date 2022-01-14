@@ -16,21 +16,44 @@
 #include "dlm.cuh"
 
 
-void simulate_dlm()
+void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
 {
+  //int n = 1000;
+  //float sigmav = 0.15;
+  //float mu = -0.5;
+  //float phi = 0.97;
+  //float sigma = 0.2;
+  //
+  //
+  Random<float> *random = new Random<float>(8687);
+  float a = 0.0;
+  //
+  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
+  //float *x = new float[n];
+  for(int i=0;i<n;i++)
+  {
+    a = mu + phi*(a - mu) + sigma*random->normal();
+    x[i] = a + sigmav*random->normal();
+  }
+  delete random;
+}
+
+
+void run_1()
+{
+  //
   int n = 1000;
   float sigmav = 0.15;
   float mu = -0.5;
   float phi = 0.97;
   float sigma = 0.2;
   //
+  float *x = new float[n];
   //
-  Random *random = new Random(8687);
-  
-  delete random;
-  
+  simulate_dlm(x,n,sigmav,mu,phi,sigma);
+  //
+  delete[] x;
 }
-
 
 
 #endif
