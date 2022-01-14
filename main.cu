@@ -4,6 +4,8 @@
 #include <time.h>
 #include <string.h>
 #include <cuda.h>
+#include "io.cuh"
+#include "random.cuh"
 
 
 int main()
