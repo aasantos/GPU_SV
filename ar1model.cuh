@@ -12,6 +12,12 @@
 #include "normalmodel.cuh"
 #include "regmodel.cuh"
 
+/*
+    The model 
+    y(t) = mu + phi*(y(t-1) - mu) + sigma*err
+
+*/
+
 template <typename T>
 class AR1Model{
 protected:
