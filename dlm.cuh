@@ -125,6 +125,7 @@ public:
         }
     }
     //
+    //
     __host__ __device__ T simulatesigmav()
     {
         T *err = new T[this->n];
@@ -138,6 +139,7 @@ public:
         delete nm;
         return this->sigmav;
     }
+    //
     //
     __host__ __device__ T simulatemu()
     {
@@ -175,25 +177,30 @@ public:
         return this->sigma;
     }
     //
+    //
     __host__ __device__ void setsigmavdiffuse(bool svdiffuse)
     {
         this->sigmavdiffuse = svdiffuse;
     }
+    //
     //
     __host__ __device__ void setmudiffuse(bool mdiffuse)
     {
         this->mudiffuse = mdiffuse;
     }
     //
+    //
     __host__ __device__ void setphidiffuse(bool pdiffuse)
     {
         this->phidiffuse = pdiffuse;
     }
     //
+    //
     __host__ __device__ void setsigmadiffuse(bool sdiffuse)
     {
         this->sigmadiffuse = sdiffuse;
     }
+    //
     //
     __host__ __device__ void setmuprior(T mprior[2])
     {
@@ -201,11 +208,13 @@ public:
         this->muprior[1] = mprior[1];
     }
     //
+    //
     __host__ __device__ void setphiprior(T pprior[2])
     {
         this->phiprior[0] = pprior[0];
         this->phiprior[1] = pprior[1];
     }
+    //
     //
     __host__ __device__ void setsigmaprior(T sprior[2])
     {
@@ -213,16 +222,19 @@ public:
         this->sigmaprior[1] = sprior[1];
     }
     //
+    //
     __host__ __device__ void setsigmavprior(T svprior[2])
     {
         this->sigmavprior[0] = svprior[0];
         this->sigmavprior[1] = svprior[1];
     }
     //
+    //
     __host__ __device__ void setphipriortype(int t)
     {
         this->phipriortype = t;
     }
+    //
     //
     __host__ __device__ void setseed(unsigned int ss)
     {
