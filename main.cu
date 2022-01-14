@@ -6,6 +6,9 @@
 #include <cuda.h>
 #include "io.cuh"
 #include "random.cuh"
+#include "normalmodel.cuh"
+#include "ar1model.cuh"
+#include "dlmmodel.cuh"
 
 
 int main()
