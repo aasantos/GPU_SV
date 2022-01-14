@@ -11,6 +11,12 @@
 #include "random.cuh"
 #include "normalmodel.cuh"
 
+/*
+the model to estimate is given by
+  y = alpha + beta*x + sigma*err
+  where err ~ N(0,1)
+*/
+
 template <typename T>
 class RegModel{
 protected:
