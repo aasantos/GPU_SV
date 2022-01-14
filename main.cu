@@ -10,7 +10,7 @@
 #include "normalmodel.cuh"
 #include "regmodel.cuh"
 #include "ar1model.cuh"
-#include "dlmmodel.cuh"
+#include "dlm.cuh"
 
 
 int main()
