@@ -52,6 +52,11 @@ void run_1()
   //
   simulate_dlm(x,n,sigmav,mu,phi,sigma);
   //
+  DLMModel<float> *dlm = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
+  
+  
+  delete dlm;
+  //
   delete[] x;
 }
 
