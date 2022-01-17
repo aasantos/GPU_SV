@@ -42,6 +42,8 @@ void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
 void run_1()
 {
   //
+  printf("Start running ... \n");
+  //
   int n = 1000;
   float sigmav = 0.15;
   float mu = -0.5;
@@ -92,6 +94,10 @@ void run_1()
   delete dlm;
   //
   delete[] x;
+  //
+  printf("Done ... \n");
+  //
+  
 }
 
 
