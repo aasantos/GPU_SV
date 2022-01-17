@@ -56,10 +56,39 @@ void run_1()
   //
   //
   for(int i=0;i<100;i++){
-    dlm->simulateStates();
+    dlm->simulatestates();
   }
+  //
+  // warmup
+  int nwarmup = 500;
+  for(int i=0;i<nwarmup;i++){ 
+    dlm->simulatestates();
+    dlm->simulatesigmav();
+    dlm->simulatemu();
+    dlm->simulatephi();
+    dlm->simulatesigma();
+  }
+  //
+  int niter = 5000;
+  float *sigmavsimul = new float[niter];
+  float *musimul = new float[niter];
+  float *phisimul = new float[niter];
+  float *sigmasimul = new float[niter];
+  for(int i=0;i<niter;i++){
+    dlm->simulatestates();
+    sigmavsimul[i] = dlm->simulatesigmav();
+    musimul[i] = dlm->simulatemu();
+    phisimul[i] = dlm->simulatephi();
+    sigmasimul[i] = dlm->simulatesigma();
+  }
+  //
   
-  
+  // memory free zone
+  delete[] sigmavsimul;
+  delete[] musimul;
+  delete[] phisimul;
+  delete[] sigmasimul;
+  //
   delete dlm;
   //
   delete[] x;
