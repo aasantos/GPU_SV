@@ -84,7 +84,15 @@ void run_1()
     sigmasimul[i] = dlm->simulatesigma();
   }
   //
-  
+  //
+  float msigmav = Vector<float>(sigmavsimul,niter).mean();
+  float mmu = Vector<float>(musimul,niter).mean();
+  float mphi = Vector<float>(phisimul,niter).mean();
+  float msigma = Vector<float>(sigmasimul,niter).mean();
+  //
+  //
+  printf("sigmav: %.3f; mu: %.3f; phi: %.3f; sigma: %.3f\n",msigmav,mmu,mphi,msigma);
+  //
   // memory free zone
   delete[] sigmavsimul;
   delete[] musimul;
