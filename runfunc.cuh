@@ -44,7 +44,7 @@ void run_1()
   //
   printf("Start running ... \n");
   //
-  int n = 1000;
+  int n = 5000;
   float sigmav = 0.15;
   float mu = -0.5;
   float phi = 0.97;
@@ -57,12 +57,12 @@ void run_1()
   DLMModel<float> *dlm = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
   //
   //
-  for(int i=0;i<100;i++){
+  for(int i=0;i<500;i++){
     dlm->simulatestates();
   }
   //
   // warmup
-  int nwarmup = 500;
+  int nwarmup = 1000;
   for(int i=0;i<nwarmup;i++){ 
     dlm->simulatestates();
     dlm->simulatesigmav();
@@ -71,7 +71,7 @@ void run_1()
     dlm->simulatesigma();
   }
   //
-  int niter = 5000;
+  int niter = 10000;
   float *sigmavsimul = new float[niter];
   float *musimul = new float[niter];
   float *phisimul = new float[niter];
