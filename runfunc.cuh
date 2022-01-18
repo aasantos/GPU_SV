@@ -1,5 +1,5 @@
-#ifndef runfunc.cuh
-#define runfunc.cuh
+#ifndef runfunc_cuh
+#define runfunc_cuh
 
 #include <stdio.h>
 #include <stdlib.h>
