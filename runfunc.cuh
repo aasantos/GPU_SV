@@ -232,13 +232,22 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
 
 void run_dlm_gpu()
 {
+  int n = 5000;
+  float sigmav = 0.15;
+  float mu = -0.5;
+  float phi = 0.97;
+  float sigma = 0.2;
+  //
+  float *x;
+  cudaMallocManaged(&x,n*sizeof(float));
+  simulate_dlm(x,n,sigmav,mu,phi,sigma);
+  //
+  //
+  int niter = 5000;
   
+  
+  cudaFree(x);
 }
-  
-  
-  
-  
-  
   
 
 #endif
