@@ -229,7 +229,8 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
 
 void run_dlm_gpu()
 {
-  int n = 5000;
+ printf("Starting .. \n");
+  int n = 1000;
   float sigmav = 0.15;
   float mu = -0.5;
   float phi = 0.97;
@@ -240,12 +241,14 @@ void run_dlm_gpu()
   simulate_dlm(x,n,sigmav,mu,phi,sigma);
   //
   //
-  int niter = 5000;
+  int niter = 1000;
+  float *sigmavsimul;
   float *musimul;
   float *phisimul;
   float *sigmasimul;
-  unsigend int *seed;
+  unsigned int *seed;
   //
+  cudaMallocManaged(&sigmavsimul,niter*sizeof(float));
   cudaMallocManaged(&musimul,niter*sizeof(float));
   cudaMallocManaged(&phisimul,niter*sizeof(float));
   cudaMallocManaged(&sigmasimul,niter*sizeof(float));
@@ -254,15 +257,17 @@ void run_dlm_gpu()
   srand(time(NULL));
   for(int i=0;i<niter;i++) seed[i] = rand();
   //
-  cudaDeviceSetLimit(cudaLimitMallocHeapSize,4194304000L);
-  kernel_dlm<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+  cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+  kernel_dlm<<<512,128>>>(x,n,seed,sigmavsimul,musimul,phisimul,sigmasimul,niter);
   cudaDeviceSynchronize();
   //
+  cudaFree(sigmavsimul);
   cudaFree(musimul);
   cudaFree(phisimul);
   cudaFree(sigmasimul);
   cudaFree(seed);
   cudaFree(x);
+  printf("Done .. \n");
 }
   
 
