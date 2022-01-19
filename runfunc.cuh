@@ -218,7 +218,7 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
       model->simulatesigma();
     }
     //
-    sigmavs[idx] = model->simulatesigmasv();
+    sigmavs[idx] = model->simulatesigmav();
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
     sigmas[idx] = model->simulatesigma();
@@ -229,7 +229,7 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
 
 void run_dlm_gpu()
 {
- printf("Starting .. \n");
+  printf("Starting .. \n");
   int n = 1000;
   float sigmav = 0.15;
   float mu = -0.5;
