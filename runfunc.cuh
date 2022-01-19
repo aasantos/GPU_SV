@@ -256,6 +256,7 @@ void run_dlm_gpu()
   srand(time(NULL));
   for(int i=0;i<niter;i++) seed[i] = rand();
   //
+  cudaDeviceSetLimit(cudaLimitMallocHeapSize,4194304000L);
   kernel_dlm<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
   cudaDeviceSynchronize();
   //
