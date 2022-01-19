@@ -20,9 +20,11 @@ int main()
 {
   printf("Hello from GPU_DLM\n");
   //
-  run_1();
+  //run_1();
   //
-  run_2();
+  //run_2();
+  //
+  run_dlm_gpu();
   //
   return 0;
 }
