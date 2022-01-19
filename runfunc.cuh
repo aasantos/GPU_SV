@@ -40,6 +40,29 @@ void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
 }
 
 
+void simulate_sv(float *x,int n,float mu,float phi,float sigma)
+{
+  //int n = 1000;
+  //float sigmav = 0.15;
+  //float mu = -0.5;
+  //float phi = 0.97;
+  //float sigma = 0.2;
+  //
+  //
+  srand(time(NULL));
+  Random<float> *random = new Random<float>(rand());
+  float a = 0.0;
+  //
+  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
+  //float *x = new float[n];
+  for(int i=0;i<n;i++)
+  {
+    a = mu + phi*(a - mu) + sigma*random->normal();
+    x[i] = exp(0.5*a)*random->normal();
+  }
+  delete random;
+}
+
 void run_1()
 {
   //
@@ -106,8 +129,69 @@ void run_1()
   //
   printf("Done ... \n");
   //
-  
 }
 
+
+void run_2()
+{
+  //
+  printf("Start running ... \n");
+  //
+  int n = 5000;
+  float mu = -0.5;
+  float phi = 0.97;
+  float sigma = 0.2;
+  //
+  int nwarmup = 1000;
+  int niter = 10000;
+  //
+  for(int k=0;k<20;k++){
+  //
+  float *x = new float[n];
+  simulate_sv(x,n,mu,phi,sigma);
+  //
+  SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
+  //
+  for(int i=0;i<500;i++){
+    model->simulatestates();
+  }
+  // warmup
+  for(int i=0;i<nwarmup;i++){ 
+    model->simulatestates();
+    model->simulatemu();
+    model->simulatephi();
+    model->simulatesigma();
+  }
+  //  
+  float *musimul = new float[niter];
+  float *phisimul = new float[niter];
+  float *sigmasimul = new float[niter];
+  //
+  for(int i=0;i<niter;i++){
+    model->simulatestates();
+    musimul[i] = model->simulatemu();
+    phisimul[i] = model->simulatephi();
+    sigmasimul[i] = model->simulatesigma();
+  }
+  //
+  float mmu = Vector<float>(musimul,niter).mean();
+  float mphi = Vector<float>(phisimul,niter).mean();
+  float msigma = Vector<float>(sigmasimul,niter).mean();
+  //
+  printf("mu: %.3f; phi: %.3f; sigma: %.3f\n",mmu,mphi,msigma);
+  //
+  //memory free zone
+  delete modl;
+  delete[] x;
+  delete[] musimul;
+  delete[] phisimul;
+  delete[] sigmasimul;
+  //
+  }
+  
+  //
+  printf("Done ... \n");
+  //
+}
 
 #endif
