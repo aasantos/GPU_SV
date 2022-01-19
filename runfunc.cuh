@@ -126,7 +126,6 @@ void run_1()
   delete[] sigmasimul;
   //
   }
-  
   //
   printf("Done ... \n");
   //
@@ -189,7 +188,6 @@ void run_2()
   delete[] sigmasimul;
   //
   }
-  
   //
   printf("Done ... \n");
   //
