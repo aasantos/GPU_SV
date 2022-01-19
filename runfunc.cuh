@@ -205,6 +205,7 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
     float sigma = 0.2;
     //
     DLMModel<float> *model = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
+    model->setseed(seed[idx]);
     //
     for(int i=0;i<100;i++){
       model->simulatestates();
