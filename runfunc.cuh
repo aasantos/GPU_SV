@@ -195,4 +195,50 @@ void run_2()
   //
 }
 
+__global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,float *mus,float *phis,float *sigmas,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < niter)
+  {
+    int nwarmup = 1000;
+    float sigmav = 0.2;
+    float mu = 0.0;
+    float phi = 0.95;
+    float sigma = 0.2;
+    //
+    DLMModel<float> *model = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
+    //
+    for(int i=0;i<100;i++){
+      model->simulatestates();
+    }
+    // warmup
+    for(int i=0;i<nwarmup;i++){ 
+      model->simulatestates();
+      model->simulatesigmav();
+      model->simulatemu();
+      model->simulatephi();
+      model->simulatesigma();
+    }
+    //
+    sigmavs[idx] = model->simulatesigmasv();
+    mus[idx] = model->simulatemu();
+    phis[idx] = model->simulatephi();
+    sigmas[idx] = model->simulatesigma();
+    //
+    delete model;
+  }
+  
+}
+
+void run_dlm_gpu()
+{
+  
+}
+  
+  
+  
+  
+  
+  
+
 #endif
