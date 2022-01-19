@@ -182,7 +182,7 @@ void run_2()
   printf("mu: %.3f; phi: %.3f; sigma: %.3f\n",mmu,mphi,msigma);
   //
   //memory free zone
-  delete modl;
+  delete model;
   delete[] x;
   delete[] musimul;
   delete[] phisimul;
