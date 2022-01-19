@@ -11,6 +11,7 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 #include "dlm.cuh"
+#include "sv.cuh"
 #include "runfunc.cuh"
 //
 //
@@ -19,5 +20,8 @@ int main()
 {
   printf("Hello from GPU_DLM\n");
   run_1();
+  //
+  run_2();
+  //
   return 0;
 }
