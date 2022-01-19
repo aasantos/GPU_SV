@@ -14,6 +14,7 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 #include "dlm.cuh"
+#include "sv.cuh"
 
 
 void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
