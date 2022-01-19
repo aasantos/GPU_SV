@@ -227,7 +227,6 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
     //
     delete model;
   }
-  
 }
 
 void run_dlm_gpu()
@@ -244,8 +243,26 @@ void run_dlm_gpu()
   //
   //
   int niter = 5000;
-  
-  
+  float *musimul;
+  float *phisimul;
+  float *sigmasimul;
+  unsigend int *seed;
+  //
+  cudaMallocManaged(&musimul,niter*sizeof(float));
+  cudaMallocManaged(&phisimul,niter*sizeof(float));
+  cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+  cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+  //
+  srand(time(NULL));
+  for(int i=0;i<niter;i++) seed[i] = rand();
+  //
+  kernel_dlm<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+  cudaDeviceSynchronize();
+  //
+  cudaFree(musimul);
+  cudaFree(phisimul);
+  cudaFree(sigmasimul);
+  cudaFree(seed);
   cudaFree(x);
 }
   
