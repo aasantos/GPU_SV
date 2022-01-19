@@ -261,6 +261,11 @@ void run_dlm_gpu()
   kernel_dlm<<<512,128>>>(x,n,seed,sigmavsimul,musimul,phisimul,sigmasimul,niter);
   cudaDeviceSynchronize();
   //
+  writeArray(sigmavsimul,"sigmavsimul.txt",niter);
+  writeArray(musimul,"musimul.txt",niter);
+  writeArray(phisimul,"phisimul.txt",niter);
+  writeArray(sigmasimul,"sigmasimul.txt",niter);
+  //
   cudaFree(sigmavsimul);
   cudaFree(musimul);
   cudaFree(phisimul);
