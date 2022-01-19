@@ -25,7 +25,8 @@ void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
   //float sigma = 0.2;
   //
   //
-  Random<float> *random = new Random<float>(8687);
+  srand(time(NULL));
+  Random<float> *random = new Random<float>(random());
   float a = 0.0;
   //
   for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
