@@ -50,19 +50,20 @@ void run_1()
   float phi = 0.97;
   float sigma = 0.2;
   //
-  float *x = new float[n];
+  int nwarmup = 1000;
+  int niter = 10000;
   //
+  for(int k=0;k<20;k++){
+  //
+  float *x = new float[n];
   simulate_dlm(x,n,sigmav,mu,phi,sigma);
   //
   DLMModel<float> *dlm = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
   //
-  //
   for(int i=0;i<500;i++){
     dlm->simulatestates();
   }
-  //
   // warmup
-  int nwarmup = 1000;
   for(int i=0;i<nwarmup;i++){ 
     dlm->simulatestates();
     dlm->simulatesigmav();
@@ -70,12 +71,12 @@ void run_1()
     dlm->simulatephi();
     dlm->simulatesigma();
   }
-  //
-  int niter = 10000;
+  //  
   float *sigmavsimul = new float[niter];
   float *musimul = new float[niter];
   float *phisimul = new float[niter];
   float *sigmasimul = new float[niter];
+  //
   for(int i=0;i<niter;i++){
     dlm->simulatestates();
     sigmavsimul[i] = dlm->simulatesigmav();
@@ -84,24 +85,23 @@ void run_1()
     sigmasimul[i] = dlm->simulatesigma();
   }
   //
-  //
   float msigmav = Vector<float>(sigmavsimul,niter).mean();
   float mmu = Vector<float>(musimul,niter).mean();
   float mphi = Vector<float>(phisimul,niter).mean();
   float msigma = Vector<float>(sigmasimul,niter).mean();
   //
-  //
   printf("sigmav: %.3f; mu: %.3f; phi: %.3f; sigma: %.3f\n",msigmav,mmu,mphi,msigma);
   //
-  // memory free zone
+  //memory free zone
+  delete dlm;
+  delete[] x;
   delete[] sigmavsimul;
   delete[] musimul;
   delete[] phisimul;
   delete[] sigmasimul;
   //
-  delete dlm;
-  //
-  delete[] x;
+  }
+  
   //
   printf("Done ... \n");
   //
