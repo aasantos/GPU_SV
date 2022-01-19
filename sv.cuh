@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "Vector.cuh"
-#include "Random.cuh"
-#include "Stats.cuh"
-#include "NormalModel.cuh"
-#include "RegModel.cuh"
-#include "AR1Model.cuh"
+#include <cuda.h>
+#include "vector.cuh"
+#include "random.cuh"
+#include "normalmodel.cuh"
+#include "regmodel.cuh"
+#include "ar1model.cuh"
 //
 //
 //
@@ -43,7 +43,7 @@ protected:
     Random<T> *random;
     //
 public:
-    SVModel(T *x,int n,T mu,T phi,T sigma)
+    __host__ __device__ SVModel(T *x,int n,T mu,T phi,T sigma)
     {
         this->x = x;
         this->n = n;
@@ -64,7 +64,7 @@ public:
         this->random = new Random<T>(this->seed);
     }
     //
-    ~SVModel()
+    __host__ __device__ ~SVModel()
     {
         if(random){
             delete random;
@@ -74,7 +74,7 @@ public:
         }
     }
     //
-    T df(T yy,T a0,T a,T a1)
+    __host__ __device__ T df(T yy,T a0,T a,T a1)
     {
         T sigmasq = this->sigma*this->sigma;
         T err1 = a - this->mu - this->phi*(a0 - this->mu);
@@ -82,13 +82,13 @@ public:
         return -0.5 + 0.5*yy*yy*exp(-1.0*a) - err1/sigmasq + this->phi*err2/sigmasq;
     }
     //
-    T ddf(T yy,T a)
+    __host__ __device__ T ddf(T yy,T a)
     {
         T sigmasq = this->sigma*this->sigma;
         return -0.5*yy*yy/exp(a) - (1.0 + this->phi*this->phi)/sigmasq;
     }
     //
-    T newton(T yy,T a0,T a1)
+    __host__ __device__ T newton(T yy,T a0,T a1)
     {
         T x0 = 0.5*(a0 + a1);
         T g = df(yy,a0,x0,a1);
@@ -102,17 +102,17 @@ public:
         return x0;
     }
     //
-    T meanstate(T yy,T a0,T a1)
+    __host__ __device__ T meanstate(T yy,T a0,T a1)
     {
         return newton(yy,a0,a1);
     }
         //
-    T stdstate(T yy,T a)
+    __host__ __device__ T stdstate(T yy,T a)
     {
         return sqrt(-1.0/ddf(yy,a));
     }
     //
-    T loglik(T yy,T a0,T a,T a1)
+    __host__ __device__ T loglik(T yy,T a0,T a,T a1)
     {
         T sigmasq = this->sigma*this->sigma;
         T t1 = -0.5*a - 0.5*yy*yy/exp(a);
@@ -123,14 +123,14 @@ public:
         return t1 + t2 + t3;
     }
         //
-    T lognorm(T a,T m,T s)
+    __host__ __device__ T lognorm(T a,T m,T s)
     {
         T err = (a - m);
         return -0.5*err*err/(s*s);
     }
     //
     //
-    T metroprob(T anew,T a,T a0,T a1,T yy,T m,T s)
+    __host__ __device__ T metroprob(T anew,T a,T a0,T a1,T yy,T m,T s)
     {
         T l1 = loglik(yy,a0,anew,a1);
         T l0 = loglik(yy,a0,a,a1);
@@ -145,7 +145,7 @@ public:
         }
     }
     //
-    void simulatestates()
+    __host__ __device__ void simulatestates()
     {
         for(int i=0;i<this->n;i++){
             T yy = this->x[i];
@@ -181,7 +181,7 @@ public:
         }
     }
     //
-    T simulatemu()
+    __host__ __device__ T simulatemu()
     {
         AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
         ar1->setseed(this->random->rand());
@@ -193,7 +193,7 @@ public:
     }
     //
     //
-    T simulatephi()
+    __host__ __device__ T simulatephi()
     {
         AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
         ar1->setseed(this->random->rand());
@@ -206,7 +206,7 @@ public:
     }
     //
     //
-    T simulatesigma()
+    __host__ __device__ T simulatesigma()
     {
         AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
         ar1->setseed(this->random->rand());
@@ -218,52 +218,52 @@ public:
     }
     //
     //
-    void setmudiffuse(bool mdiffuse)
+    __host__ __device__ void setmudiffuse(bool mdiffuse)
     {
         this->mudiffuse = mdiffuse;
     }
     //
     //
-    void setphidiffuse(bool pdiffuse)
+    __host__ __device__ void setphidiffuse(bool pdiffuse)
     {
         this->phidiffuse = pdiffuse;
     }
     //
     //
-    void setsigmadiffuse(bool sdiffuse)
+    __host__ __device__ void setsigmadiffuse(bool sdiffuse)
     {
         this->sigmadiffuse = sdiffuse;
     }
     //
     //
-    void setmuprior(T mprior[2])
+    __host__ __device__ void setmuprior(T mprior[2])
     {
         this->muprior[0] = mprior[0];
         this->muprior[1] = mprior[1];
     }
     //
     //
-    void setphiprior(T pprior[2])
+    __host__ __device__ void setphiprior(T pprior[2])
     {
         this->phiprior[0] = pprior[0];
         this->phiprior[1] = pprior[1];
     }
     //
     //
-    void setsigmaprior(T sprior[2])
+    __host__ __device__ void setsigmaprior(T sprior[2])
     {
         this->sigmaprior[0] = sprior[0];
         this->sigmaprior[1] = sprior[1];
     }
     //
     //
-    void setphipriortype(int t)
+    __host__ __device__ void setphipriortype(int t)
     {
         this->phipriortype = t;
     }
     //
     //
-    void setseed(unsigned int ss)
+    __host__ __device__ void setseed(unsigned int ss)
     {
         if(random){
             delete random;
