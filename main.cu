@@ -24,7 +24,9 @@ int main()
   //
   //run_2();
   //
-  run_dlm_gpu();
+  //run_dlm_gpu();
+  //
+  run_sv_gpu();
   //
   return 0;
 }
