@@ -322,16 +322,17 @@ void run_sv_gpu()
   float phi = 0.97;
   float sigma = 0.2;
   //
-  float *mumean = new float[100];
-  float *phimean = new float[100];
-  float *sigmamean = new float[100];
+  int m = 250;
+  float *mumean = new float[m];
+  float *phimean = new float[m];
+  float *sigmamean = new float[m];
   //
-  float *yy = new float[200000];
+  float *yy = new float[n*m];
   int kiter = -1;
   //
   //
   //
-  for(int k=0;k<100;k++){
+  for(int k=0;k<m;k++){
     //
     printf("Iteration: %d\n",k);
     float *x;
@@ -342,7 +343,7 @@ void run_sv_gpu()
       yy[kiter] = x[j];
     }
     //
-    int niter = 5000;
+    int niter = 10000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
