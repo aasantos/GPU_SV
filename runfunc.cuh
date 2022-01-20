@@ -329,6 +329,8 @@ void run_sv_gpu()
   float *yy = new float[200000];
   int kiter = -1;
   //
+  //
+  //
   for(int k=0;k<100;k++){
     //
     printf("Iteration: %d\n",k);
@@ -358,12 +360,10 @@ void run_sv_gpu()
     kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
-    //writeArray(musimul,"musimul.txt",niter);
-    //writeArray(phisimul,"phisimul.txt",niter);
-    //writeArray(sigmasimul,"sigmasimul.txt",niter);
     float mmu = Vector<float>(musimul,niter).mean();
     float mphi = Vector<float>(phisimul,niter).mean();
     float msigma = Vector<float>(sigmasimul,niter).mean();
+    //
     mumean[k] = mmu;
     phimean[k] = mphi;
     sigmamean[k] = msigma;
@@ -375,6 +375,7 @@ void run_sv_gpu()
     cudaFree(sigmasimul);
     cudaFree(seed);
     cudaFree(x);
+    cudaDeviceReset();
     //
     sleep(10);
    }
