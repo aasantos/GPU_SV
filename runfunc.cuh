@@ -228,6 +228,41 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
   }
 }
 
+
+__global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *phis,float *sigmas,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < niter)
+  {
+    int nwarmup = 1000;
+    float mu = 0.0;
+    float phi = 0.95;
+    float sigma = 0.2;
+    //
+    SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
+    model->setseed(seed[idx]);
+    //
+    for(int i=0;i<100;i++){
+      model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){ 
+      model->simulatestates();
+      model->simulatemu();
+      model->simulatephi();
+      model->simulatesigma();
+    }
+    //
+    mus[idx] = model->simulatemu();
+    phis[idx] = model->simulatephi();
+    sigmas[idx] = model->simulatesigma();
+    //
+    delete model;
+  }
+}
+
+
 void run_dlm_gpu()
 {
   printf("Starting .. \n");
@@ -275,6 +310,50 @@ void run_dlm_gpu()
   cudaFree(x);
   printf("Done .. \n");
 }
-  
+ 
+
+void run_sv_gpu()
+{
+  printf("Starting .. \n");
+  //
+  int n = 2000;
+  float mu = -0.5;
+  float phi = 0.97;
+  float sigma = 0.2;
+  //
+  float *x;
+  cudaMallocManaged(&x,n*sizeof(float));
+  simulate_sv(x,n,mu,phi,sigma);
+  //
+  int niter = 5000;
+  float *musimul;
+  float *phisimul;
+  float *sigmasimul;
+  unsigned int *seed;
+  //
+  cudaMallocManaged(&musimul,niter*sizeof(float));
+  cudaMallocManaged(&phisimul,niter*sizeof(float));
+  cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+  cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+  //
+  srand(time(NULL));
+  for(int i=0;i<niter;i++) seed[i] = rand();
+  //
+  cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+  kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+  cudaDeviceSynchronize();
+  //
+  writeArray(musimul,"musimul.txt",niter);
+  writeArray(phisimul,"phisimul.txt",niter);
+  writeArray(sigmasimul,"sigmasimul.txt",niter);
+  //
+  cudaFree(musimul);
+  cudaFree(phisimul);
+  cudaFree(sigmasimul);
+  cudaFree(seed);
+  cudaFree(x);
+  //
+  printf("Done .. \n");
+}
 
 #endif
