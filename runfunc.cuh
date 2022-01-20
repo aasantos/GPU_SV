@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 #include <cuda.h>
 #include "io.cuh"
 #include "vector.cuh"
@@ -375,6 +376,7 @@ void run_sv_gpu()
     cudaFree(seed);
     cudaFree(x);
     //
+    sleep(10);
    }
    //
    writeArray<float>(yy,"yy.txt",200000);
