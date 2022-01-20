@@ -377,10 +377,10 @@ void run_sv_gpu()
     //
    }
    //
-   writeArray("yy.txt",yy,200000);
-   writeArray("mumean.txt",mumean,100);
-   writeArray("phimean.txt",phimean,100);
-   writeArray("sigmamean.txt",sigmamean,100);
+   writeArray<float>(yy,"yy.txt",200000);
+   writeArray<float>(mumean,"mumean.txt",100);
+   writeArray<float>(phimean,"phimean.txt",100);
+   writeArray<float>(sigmamean,"sigmamean.txt",100);
    //
    delete[] yy;
    delete[] mumean;
