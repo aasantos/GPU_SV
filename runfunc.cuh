@@ -321,12 +321,23 @@ void run_sv_gpu()
   float phi = 0.97;
   float sigma = 0.2;
   //
-  for(int k=0;k<10;k++){
+  float *mumean = new float[100];
+  float *phimean = new float[100];
+  float *sigmamean = new float[100];
+  //
+  float *yy = new float[200000];
+  int kiter = -1;
+  //
+  for(int k=0;k<100;k++){
     //
     printf("Iteration: %d\n",k);
     float *x;
     cudaMallocManaged(&x,n*sizeof(float));
     simulate_sv(x,n,mu,phi,sigma);
+    for(int j=0;j<n;j++){
+      kiter++;
+      yy[kiter] = x[j];
+    }
     //
     int niter = 5000;
     float *musimul;
@@ -352,6 +363,9 @@ void run_sv_gpu()
     float mmu = Vector<float>(musimul,niter).mean();
     float mphi = Vector<float>(phisimul,niter).mean();
     float msigma = Vector<float>(sigmasimul,niter).mean();
+    mumean[k] = mmu;
+    phimean[k] = mphi;
+    sigmamean[k] = msigma;
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
     //
@@ -362,6 +376,17 @@ void run_sv_gpu()
     cudaFree(x);
     //
    }
+   //
+   writeArray("yy.txt",yy,200000);
+   writeArray("mumean.txt",mumean,100);
+   writeArray("phimean.txt",phimean,100);
+   writeArray("sigmamean.txt",sigmamean,100);
+   //
+   delete[] yy;
+   delete[] mumean;
+   delete[] phimean;
+   delete[] sigmamean;
+   //
    printf("Done .. \n");
 }
 
