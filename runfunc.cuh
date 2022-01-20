@@ -321,39 +321,48 @@ void run_sv_gpu()
   float phi = 0.97;
   float sigma = 0.2;
   //
-  float *x;
-  cudaMallocManaged(&x,n*sizeof(float));
-  simulate_sv(x,n,mu,phi,sigma);
-  //
-  int niter = 5000;
-  float *musimul;
-  float *phisimul;
-  float *sigmasimul;
-  unsigned int *seed;
-  //
-  cudaMallocManaged(&musimul,niter*sizeof(float));
-  cudaMallocManaged(&phisimul,niter*sizeof(float));
-  cudaMallocManaged(&sigmasimul,niter*sizeof(float));
-  cudaMallocManaged(&seed,niter*sizeof(unsigned int));
-  //
-  srand(time(NULL));
-  for(int i=0;i<niter;i++) seed[i] = rand();
-  //
-  cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-  kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
-  cudaDeviceSynchronize();
-  //
-  writeArray(musimul,"musimul.txt",niter);
-  writeArray(phisimul,"phisimul.txt",niter);
-  writeArray(sigmasimul,"sigmasimul.txt",niter);
-  //
-  cudaFree(musimul);
-  cudaFree(phisimul);
-  cudaFree(sigmasimul);
-  cudaFree(seed);
-  cudaFree(x);
-  //
-  printf("Done .. \n");
+  for(int k=0;k<10;k++){
+    //
+    printf("Iteration: %d\n",k);
+    float *x;
+    cudaMallocManaged(&x,n*sizeof(float));
+    simulate_sv(x,n,mu,phi,sigma);
+    //
+    int niter = 5000;
+    float *musimul;
+    float *phisimul;
+    float *sigmasimul;
+    unsigned int *seed;
+    //
+    cudaMallocManaged(&musimul,niter*sizeof(float));
+    cudaMallocManaged(&phisimul,niter*sizeof(float));
+    cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+    cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+    //
+    srand(time(NULL));
+    for(int i=0;i<niter;i++) seed[i] = rand();
+    //
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+    kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    cudaDeviceSynchronize();
+    //
+    //writeArray(musimul,"musimul.txt",niter);
+    //writeArray(phisimul,"phisimul.txt",niter);
+    //writeArray(sigmasimul,"sigmasimul.txt",niter);
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    //
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
+    //
+    cudaFree(musimul);
+    cudaFree(phisimul);
+    cudaFree(sigmasimul);
+    cudaFree(seed);
+    cudaFree(x);
+    //
+   }
+   printf("Done .. \n");
 }
 
 #endif
