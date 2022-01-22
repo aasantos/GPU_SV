@@ -322,7 +322,7 @@ void run_sv_gpu()
   float phi = 0.97;
   float sigma = 0.2;
   //
-  int m = 250;
+  int m = 100;
   float *mumean = new float[m];
   float *phimean = new float[m];
   float *sigmamean = new float[m];
