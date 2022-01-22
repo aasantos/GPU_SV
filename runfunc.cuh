@@ -343,7 +343,7 @@ void run_sv_gpu()
       yy[kiter] = x[j];
     }
     //
-    int niter = 10000;
+    int niter = 5000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -381,10 +381,10 @@ void run_sv_gpu()
     sleep(10);
    }
    //
-   writeArray<float>(yy,"yy.txt",200000);
-   writeArray<float>(mumean,"mumean.txt",100);
-   writeArray<float>(phimean,"phimean.txt",100);
-   writeArray<float>(sigmamean,"sigmamean.txt",100);
+   writeArray<float>(yy,"yy.txt",n*m);
+   writeArray<float>(mumean,"mumean.txt",m);
+   writeArray<float>(phimean,"phimean.txt",m);
+   writeArray<float>(sigmamean,"sigmamean.txt",m);
    //
    delete[] yy;
    delete[] mumean;
