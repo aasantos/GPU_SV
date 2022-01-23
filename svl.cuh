@@ -24,6 +24,8 @@ protected:
     T mu;
     T phi;
     T sigma;
+    T rho;
+    //
     T a0;
     T a1;
     //
@@ -42,13 +44,14 @@ protected:
     Random<T> *random;
     //
 public:
-    __host__ __device__ SVLModel(T *x,int n,T mu,T phi,T sigma)
+    __host__ __device__ SVLModel(T *x,int n,T mu,T phi,T sigma,T rho)
     {
         this->x = x;
         this->n = n;
         this->mu = mu;
         this->phi = phi;
         this->sigma = sigma;
+        this->rho = rho;
         this-> alpha = new T[n];
         for(int i=0;i<this->n;i++) this->alpha[i] = 0.0;
         this->a0 = 0.0; this->a1 = 0.0;
