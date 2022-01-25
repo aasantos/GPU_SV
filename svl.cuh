@@ -155,38 +155,7 @@ public:
     //
     __host__ __device__ void simulatestates()
     {
-        for(int i=0;i<this->n;i++){
-            T yy = this->x[i];
-            if(i==0){
-                this->a0 = this->random->normal(this->mu,this->sigma/sqrt(1.0 - this->phi*this->phi));
-                this->a1 = this->alpha[i+1];
-                T mx = meanstate(yy,a0,a1);
-                T sx = stdstate(yy,mx);
-                T atemp = this->random->normal(mx, sx);
-                if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
-                   this->alpha[i] = atemp;
-                }
-            }else if(i==(n-1)){
-                  this->a0 = this->alpha[i-1];
-                  this->a1 = this->mu + this->phi*(this->alpha[i] - this->mu)
-                                + this->random->normal(0.0,this->sigma);
-                  T mx = meanstate(yy,a0,a1);
-                  T sx = stdstate(yy,mx);
-                  T atemp = this->random->normal(mx, sx);
-                  if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
-                    this->alpha[i] = atemp;
-                  }
-            }else{
-               this->a0 = this->alpha[i-1];
-               this->a1 = this->alpha[i+1];
-               T mx = meanstate(yy,a0,a1);
-               T sx = stdstate(yy,mx);
-               T atemp = this->random->normal(mx, sx);
-               if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
-                  this->alpha[i] = atemp;
-                }
-            }
-        }
+
     }
     //
     __host__ __device__ T simulatemu()
