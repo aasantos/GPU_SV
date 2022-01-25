@@ -76,37 +76,44 @@ public:
         }
     }
     //
-    __host__ __device__ T df(T yy,T a0,T a,T a1)
+    __host__ __device__ T df(T yy,T yy0,T a0,T a,T a1)
     {
-        T sigmasq = this->sigma*this->sigma;
-        T err1 = a - this->mu - this->phi*(a0 - this->mu);
-        T err2 = a1 - this->mu - this->phi*(a - this->mu);
-        return -0.5 + 0.5*yy*yy*exp(-1.0*a) - err1/sigmasq + this->phi*err2/sigmasq;
+        T t1 = -0.5e0 + 0.5e0 * yy * yy * exp(-a);
+        T t2 = -(a1 - this->mu - this->phi * (a - this->mu) - this->sigma * this->rho * exp(-0.5e0 * a) * yy) * 
+            pow(this->sigma, -0.2e1) / (-this->rho * this->rho + 0.1e1) * (-this->phi + 0.5e0 * this->sigma * this->rho * exp(-0.5e0 * a) * yy);
+        T t3 = -(a - this->mu - this->phi * (a0 - this->mu) - this->sigma * this->rho * exp(-0.5e0 * a0) * yy0) * 
+            pow(this->sigma, -0.2e1) / (-this->rho * this->rho + 0.1e1);
+        return t1 + t2 + t3;
     }
     //
     __host__ __device__ T ddf(T yy,T a)
     {
-        T sigmasq = this->sigma*this->sigma;
-        return -0.5*yy*yy/exp(a) - (1.0 + this->phi*this->phi)/sigmasq;
+        T t1 = -0.5e0 * yy * yy * exp(-a);
+        T t2 = -pow(-this->phi + 0.5e0 * this->sigma * this->rho * exp(-0.5e0 * a) * yy, 0.2e1) * 
+            pow(this->sigma, -0.2e1) / (-this->rho * this->rho + 0.1e1) + 0.25e0 * (a1 - this->mu - this->phi * 
+            (a - this->mu) - this->sigma * this->rho * exp(-0.5e0 * a) * yy) / this->sigma / 
+            (-this->rho * this->rho + 0.1e1) * this->rho * exp(-0.5e0 * a) * yy;
+        T t3 = -pow(this->sigma, -0.2e1) / (double) (-this->rho * this->rho + 1.0);
+        return t1 + t2 + t3;
     }
     //
-    __host__ __device__ T newton(T yy,T a0,T a1)
+    __host__ __device__ T newton(T yy,T yy0,T a0,T a1)
     {
         T x0 = 0.5*(a0 + a1);
-        T g = df(yy,a0,x0,a1);
+        T g = df(yy,yy0,a0,x0,a1);
         int iter = 0;
         while(abs(g) > 0.00001 && iter < 20){
             T h = ddf(yy,x0);
             x0 = x0 - g/h;
-            g = df(yy,a0,x0,a1);
+            g = df(yy,yy0,a0,x0,a1);
             iter++;
         }
         return x0;
     }
     //
-    __host__ __device__ T meanstate(T yy,T a0,T a1)
+    __host__ __device__ T meanstate(T yy,T yy0,T a0,T a1)
     {
-        return newton(yy,a0,a1);
+        return newton(yy,yy0,a0,a1);
     }
         //
     __host__ __device__ T stdstate(T yy,T a)
@@ -114,14 +121,13 @@ public:
         return sqrt(-1.0/ddf(yy,a));
     }
     //
-    __host__ __device__ T loglik(T yy,T a0,T a,T a1)
+    __host__ __device__ T loglik(T yy,T yy0,T a0,T a,T a1)
     {
-        T sigmasq = this->sigma*this->sigma;
-        T t1 = -0.5*a - 0.5*yy*yy/exp(a);
-        T err2 = (a1 - this->mu - this->phi*(a - this->mu));
-        T t2 = -0.5*err2*err2/sigmasq;
-        T err3 = (a - this->mu - this->phi*(a0 - this->mu));
-        T t3 = -0.5*err3*err3/sigmasq;
+        T t1 = -0.5e0 * a - 0.5e0 * yy * yy * exp(-a);
+        T t2 = -pow(a1 - this->mu - this->phi * (a - this->mu) - this->sigma * this->rho * exp(-0.5e0 * a) * yy, 0.2e1) 
+            * pow(this->sigma, -0.2e1) / (-this->rho * this->rho + 0.1e1) / 0.2e1;
+        T t3 = -pow(a - this->mu - this->phi * (a0 - this->mu) - this->sigma * this->rho * exp(-0.5e0 * a0) 
+            * yy0, 0.2e1) * pow(this->sigma, -0.2e1) / (-this->rho * this->rho + 0.1e1) / 0.2e1;
         return t1 + t2 + t3;
     }
         //
@@ -132,10 +138,10 @@ public:
     }
     //
     //
-    __host__ __device__ T metroprob(T anew,T a,T a0,T a1,T yy,T m,T s)
+    __host__ __device__ T metroprob(T anew,T a,T a0,T a1,T yy,T yy0,T m,T s)
     {
-        T l1 = loglik(yy,a0,anew,a1);
-        T l0 = loglik(yy,a0,a,a1);
+        T l1 = loglik(yy,yy0,a0,anew,a1);
+        T l0 = loglik(yy,yy0,a0,a,a1);
         T g0 = lognorm(a,m,s);
         T g1 = lognorm(anew,m,s);
         T tt = l1 - l0 + g0 - g1;
@@ -185,37 +191,19 @@ public:
     //
     __host__ __device__ T simulatemu()
     {
-        AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
-        ar1->setseed(this->random->rand());
-        ar1->setmudiffuse(this->mudiffuse);
-        ar1->setmuprior(this->muprior);
-        this->mu = ar1->simulatemu();
-        delete ar1;
+        
         return this->mu;
     }
     //
     //
     __host__ __device__ T simulatephi()
     {
-        AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
-        ar1->setseed(this->random->rand());
-        ar1->setphidiffuse(this->phidiffuse);
-        ar1->setphipriortype(this->phipriortype);
-        ar1->setphiprior(this->phiprior);
-        this->phi = ar1->simulatephi();
-        delete ar1;
         return this->phi;
     }
     //
     //
     __host__ __device__ T simulatesigma()
     {
-        AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
-        ar1->setseed(this->random->rand());
-        ar1->setsigmadiffuse(this->sigmadiffuse);
-        ar1->setsigmaprior(this->sigmaprior);
-        this->sigma = ar1->simulatesigma();
-        delete ar1;
         return this->sigma;
     }
     //
