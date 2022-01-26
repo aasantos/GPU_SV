@@ -331,6 +331,59 @@ public:
         return res;
     }
 //
+    //
+    __host__ __device__ double sampleuni(double *x,double *w,int n)
+    {
+        double z = 0.0;
+        double *Q = new double[n];
+        Q[0] = w[0];
+        for(int i=1;i<n;i++){
+            Q[i] = Q[i-1] + w[i];
+        }
+        int iter = 0;
+        double r = uniform();
+        if(r < Q[0]){
+            z = x[0];
+            return z;
+        }
+        do{
+            if( r > Q[iter] && r < Q[iter+1]){
+                z = x[iter+1];
+                return z;
+            }
+            iter++;
+        }while(iter < (n-1));
+        delete[] Q;
+        return z;
+    }
+    //
+    //
+    __host__ __device__ int sampleuni(int *x,double *w,int n)
+    {
+        int z = 0;
+        double *Q = new double[n];
+        Q[0] = w[0];
+        for(int i=1;i<n;i++){
+            Q[i] = Q[i-1] + w[i];
+        }
+        int iter = 0;
+        double r = uniform();
+        if(r < Q[0]){
+            z = x[0];
+            return z;
+        }
+        do{
+            if( r > Q[iter] && r < Q[iter+1]){
+                z = x[iter+1];
+                return z;
+            }
+            iter++;
+        }while(iter < (n-1));
+        delete[] Q;
+        return z;
+    }
+    //
+
 //
 private:
     unsigned long long x;
