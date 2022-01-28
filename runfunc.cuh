@@ -16,6 +16,14 @@
 #include "ar1model.cuh"
 #include "dlm.cuh"
 #include "sv.cuh"
+#include "svt.cuh"
+#include "svl.cuh"
+#include "svtl.cuh"
+
+void estimate_sv_sp500()
+{
+  
+}
 
 
 void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
