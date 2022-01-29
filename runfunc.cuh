@@ -25,6 +25,69 @@ void estimate_sv_sp500()
   int n;
   float *x = readArray<float>("sp500y.txt",&n);
   printf("Number of observations: %d\n",n);
+    //
+    float mut = -0.5;
+    float phit = 0.97;
+    float sigmat = 0.2;
+    float rhot = -0.7;
+    //
+    int nwarmup = 5000;
+    int niter = 20000;
+    //
+    SVLModel<float> *model = new SVLModel<float>(x,n,mut,phit,sigmat,rhot);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulatemu();
+        model->simulatephi();
+        model->simulatesigmarho();
+    }
+    //
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    float *rhosimul = new float[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        float mt = model->simulatemu();
+        float pt = model->simulatephi();
+        model->simulatesigmarho();
+        float st = model->getsigma();
+        float rt = model->getrho();
+        musimul[i] = mt;
+        phisimul[i] = pt;
+        sigmasimul[i] = st;
+        rhosimul[i] = rt;
+    }
+    //
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mrho = Vector<float>(rhosimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f\n",mmu,mphi,msigma,mrho);
+    //
+    //
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete[] rhosimul;
+    delete model;
   free(x);
 }
 
