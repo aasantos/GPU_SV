@@ -22,7 +22,10 @@
 
 void estimate_sv_sp500()
 {
-  
+  int n;
+  float *x = readArray<float>("sp500y.txt",&n);
+  printf("Number of observations: %d\n",n);
+  free(x);
 }
 
 
