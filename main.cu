@@ -26,7 +26,9 @@ int main()
   //
   //run_dlm_gpu();
   //
-  run_sv_gpu();
+  //run_sv_gpu();
+  //
+  estimate_sv_sp500();
   //
   return 0;
 }
