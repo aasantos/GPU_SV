@@ -60,6 +60,7 @@ __global__ void estimate_sv_sp500_gpu(float *x,int n,float *musimul,float *phisi
 
 void estimate_gpu_sv_sp500()
 {
+  printf("Start estimating .... \n");
   int n;
   float *xi = readArray<float>("sp500y.txt",&n);
   //
@@ -100,6 +101,7 @@ void estimate_gpu_sv_sp500()
   cudaFree(rhosimul);
   //
   free(xi);
+  printf("Done ... \n");
 }
 
 void estimate_sv_sp500()
