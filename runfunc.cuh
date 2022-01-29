@@ -35,7 +35,7 @@ __global__ void estimate_sv_sp500_gpu(float *x,int n,float *musimul,float *phisi
     SVLModel<float> *model = new SVLModel<float>(x,n,mut,phit,sigmat,rhot);
     model->setseed(seed[idx]);
     //
-    for(int i=0;i<50;i++){
+    for(int i=0;i<100;i++){
         model->simulatestates();
     }
     //
@@ -68,7 +68,7 @@ void estimate_gpu_sv_sp500()
   cudaMallocManaged(&x,n*sizeof(float));
   for(int i=0;i<n;i++) x[i] = xi[i];
   //
-  int niter = 5000;
+  int niter = 2000;
   srand((unsigned int)time(NULL));
   unsigned int *seed;
   cudaMallocManaged(&seed,niter*sizeof(unsigned int));
@@ -84,7 +84,7 @@ void estimate_gpu_sv_sp500()
   cudaMallocManaged(&rhosimul,niter*sizeof(float));
   //
   //
-  cudaDeviceSetLimit(cudaLimitMallocHeapSize,10485760000L);
+  cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
   estimate_sv_sp500_gpu<<<512,16>>>(x,n,musimul,phisimul,sigmasimul,rhosimul,seed,niter);
   cudaDeviceSynchronize();
   //
