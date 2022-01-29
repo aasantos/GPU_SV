@@ -20,6 +20,83 @@
 #include "svl.cuh"
 #include "svtl.cuh"
 
+__global__ void estimate_sv_sp500_gpu(float *x,int n,float *musimul,float *phisimul,float *sigmasimul,float *rhosimul,unsigned int *seed,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < nter){
+    //
+    float mut = -0.5;
+    float phit = 0.97;
+    float sigmat = 0.2;
+    float rhot = -0.7;
+    //
+    int nwarmup = 5000;
+    //
+    SVLModel<float> *model = new SVLModel<float>(x,n,mut,phit,sigmat,rhot);
+    model->setseed(seed[idx]);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // 
+    for(int i=0;i<nwarmup;i++){
+        model->simulatestates();
+        model->simulatemu();
+        model->simulatephi();
+        model->simulatesigmarho();
+    }
+    //
+    musimul[idx] = model->simulatemu();
+    phisimul[idx] = model->simulatephi();
+    model->simulatesigmarho();
+    sigmasimul[idx] = model->getsigma();
+    rhosimul[idx] = model->getrho();
+    //
+    delete model;
+    //
+  }// if(idx < niter)
+}
+
+void estimate_gpu_sv_sp500()
+{
+  int n;
+  float *xi = readArray<float>("sp500y.txt",&n);
+  //
+  float *x;
+  cudaMallocManaged(&x,n*sizeof(float));
+  for(int i=0;i<n;i++) x[i] = xi[i];
+  //
+  niter = 5000;
+  srand((unsigned int)time(NULL));
+  unsigned int *seed;
+  cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+  for(int i=0;i<niter;i++) seed[i] = rand();
+  //
+  float *musimul;
+  cudaMallocManaged(&musimul,niter*sizeof(float));
+  float *phisimul;
+  cudaMallocManaged(&phisimul,niter*sizeof(float));
+  float *sigmasimul;
+  cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+  float *rhosimul;
+  cudaMallocManaged(&rhosimul,niter*sizeof(float));
+  //
+  //
+  estimate_sv_sp500_gpu<<<512,16>>>(x,n,musimul,phisimul,sigmasimul,rhosimul,seed,niter);
+  cudaDeviceSynchronize();
+  //
+  //
+  cudaFree(x);
+  cudaFree(seed);
+  cudaFree(musimul);
+  cudaFree(phisimul);
+  cudaFree(sigmasimul);
+  cudaFree(rhosimul);
+  //
+  free(xi);
+}
+
 void estimate_sv_sp500()
 {
   int n;
