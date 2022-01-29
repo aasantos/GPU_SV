@@ -83,9 +83,14 @@ void estimate_gpu_sv_sp500()
   cudaMallocManaged(&rhosimul,niter*sizeof(float));
   //
   //
+  cudaDeviceSetLimit(cudaLimitMallocHeapSize,10485760000L);
   estimate_sv_sp500_gpu<<<512,16>>>(x,n,musimul,phisimul,sigmasimul,rhosimul,seed,niter);
   cudaDeviceSynchronize();
   //
+  writeArray<float>(musimul,"musimul.txt",niter);
+  writeArray<float>(phisimul,"phisimul.txt",niter);
+  writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+  writeArray<float>(rhosimul,"rhosimul.txt",niter);
   //
   cudaFree(x);
   cudaFree(seed);
