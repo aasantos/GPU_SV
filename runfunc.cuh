@@ -30,12 +30,12 @@ __global__ void estimate_sv_sp500_gpu(float *x,int n,float *musimul,float *phisi
     float sigmat = 0.2;
     float rhot = -0.7;
     //
-    int nwarmup = 5000;
+    int nwarmup = 1000;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mut,phit,sigmat,rhot);
     model->setseed(seed[idx]);
     //
-    for(int i=0;i<500;i++){
+    for(int i=0;i<50;i++){
         model->simulatestates();
     }
     //
