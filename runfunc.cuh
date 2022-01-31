@@ -21,12 +21,29 @@
 #include "svtl.cuh"
 #include "kernelfunc.cuh"
 
+void simulate_sv(float *x,int n,float mu,float phi,float sigma)
+{
+  //
+  srand(time(NULL));
+  Random<float> *random = new Random<float>(rand());
+  float a = 0.0;
+  //
+  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
+  //float *x = new float[n];
+  for(int i=0;i<n;i++)
+  {
+    a = mu + phi*(a - mu) + sigma*random->normal();
+    x[i] = exp(0.5*a)*random->normal();
+  }
+  delete random;
+}
+
 void estimate_gpu_sv_sp500()
 {
-  printf("Start estimating .... \n");
-  int n;
-  float *xi = readArray<float>("sp500_ret_80_87.txt",&n);
-  //
+    printf("Start estimating .... \n");
+    int n;
+    float *xi = readArray<float>("sp500_ret_80_87.txt",&n);
+    //
     float *x;
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
@@ -72,9 +89,9 @@ void estimate_gpu_sv_sp500()
 
 void estimate_sv_sp500()
 {
-  int n;
-  float *x = readArray<float>("sp500y.txt",&n);
-  printf("Number of observations: %d\n",n);
+    int n;
+    float *x = readArray<float>("sp500_ret_80_87.txt",&n);
+    printf("Number of observations: %d\n",n);
     //
     float mut = -0.5;
     float phit = 0.97;
@@ -161,30 +178,6 @@ void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
   {
     a = mu + phi*(a - mu) + sigma*random->normal();
     x[i] = a + sigmav*random->normal();
-  }
-  delete random;
-}
-
-
-void simulate_sv(float *x,int n,float mu,float phi,float sigma)
-{
-  //int n = 1000;
-  //float sigmav = 0.15;
-  //float mu = -0.5;
-  //float phi = 0.97;
-  //float sigma = 0.2;
-  //
-  //
-  srand(time(NULL));
-  Random<float> *random = new Random<float>(rand());
-  float a = 0.0;
-  //
-  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
-  //float *x = new float[n];
-  for(int i=0;i<n;i++)
-  {
-    a = mu + phi*(a - mu) + sigma*random->normal();
-    x[i] = exp(0.5*a)*random->normal();
   }
   delete random;
 }
