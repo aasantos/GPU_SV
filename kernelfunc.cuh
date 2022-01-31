@@ -22,6 +22,43 @@
 #include "svtl.cuh"
 
 
+__global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,float *mus,float *phis,float *sigmas,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < niter)
+  {
+    int nwarmup = 1000;
+    float sigmav = 0.2;
+    float mu = 0.0;
+    float phi = 0.95;
+    float sigma = 0.2;
+    //
+    DLMModel<float> *model = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
+    model->setseed(seed[idx]);
+    //
+    for(int i=0;i<100;i++){
+      model->simulatestates();
+    }
+    // warmup
+    for(int i=0;i<nwarmup;i++){ 
+      model->simulatestates();
+      model->simulatesigmav();
+      model->simulatemu();
+      model->simulatephi();
+      model->simulatesigma();
+    }
+    //
+    sigmavs[idx] = model->simulatesigmav();
+    mus[idx] = model->simulatemu();
+    phis[idx] = model->simulatephi();
+    sigmas[idx] = model->simulatesigma();
+    //
+    delete model;
+  }
+}
+
+
+
 __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *phis,float *sigmas,int niter)
 {
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
@@ -56,17 +93,16 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
 }
 
 
-__global__ void estimate_sv_sp500_gpu(float *x,int n,float *musimul,float *phisimul,float *sigmasimul,float *rhosimul,unsigned int *seed,int niter)
+__global__ void kernel_svl(float *x,int n,unsigned int *seed,float *musimul,float *phisimul,float *sigmasimul,float *rhosimul,int niter)
 {
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter){
     //
+    int nwarmup = 1000;
     float mu = -0.5;
     float phi = 0.97;
     float sigma = 0.2;
     float rho = -0.7;
-    //
-    int nwarmup = 1000;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);

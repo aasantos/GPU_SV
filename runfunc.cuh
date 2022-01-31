@@ -21,6 +21,28 @@
 #include "svtl.cuh"
 #include "kernelfunc.cuh"
 
+//
+//
+//   Simulate from models
+//
+//
+void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
+{
+  //
+  srand(time(NULL));
+  Random<float> *random = new Random<float>(rand());
+  float a = 0.0;
+  //
+  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
+  //float *x = new float[n];
+  for(int i=0;i<n;i++)
+  {
+    a = mu + phi*(a - mu) + sigma*random->normal();
+    x[i] = a + sigmav*random->normal();
+  }
+  delete random;
+}
+
 void simulate_sv(float *x,int n,float mu,float phi,float sigma)
 {
   //
@@ -37,7 +59,10 @@ void simulate_sv(float *x,int n,float mu,float phi,float sigma)
   }
   delete random;
 }
-
+//
+//
+//estimate SV models
+//
 void estimate_gpu_sv_sp500()
 {
     printf("Start estimating .... \n");
@@ -87,21 +112,21 @@ void estimate_gpu_sv_sp500()
   printf("Done ... \n");
 }
 
-void estimate_sv_sp500()
+void estimate_svl_sp500()
 {
     int n;
     float *x = readArray<float>("sp500_ret_80_87.txt",&n);
     printf("Number of observations: %d\n",n);
     //
-    float mut = -0.5;
-    float phit = 0.97;
-    float sigmat = 0.2;
-    float rhot = -0.7;
+    float mu = -0.5;
+    float phi = 0.97;
+    float sigma = 0.2;
+    float rho = -0.7;
     //
     int nwarmup = 5000;
     int niter = 20000;
     //
-    SVLModel<float> *model = new SVLModel<float>(x,n,mut,phit,sigmat,rhot);
+    SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     //
     for(int i=0;i<500;i++){
         model->simulatestates();
@@ -157,31 +182,13 @@ void estimate_sv_sp500()
     delete model;
   free(x);
 }
-
-
-void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
-{
-  //int n = 1000;
-  //float sigmav = 0.15;
-  //float mu = -0.5;
-  //float phi = 0.97;
-  //float sigma = 0.2;
-  //
-  //
-  srand(time(NULL));
-  Random<float> *random = new Random<float>(rand());
-  float a = 0.0;
-  //
-  for(int i=0;i<100;i++) a = mu + phi*(a - mu) + sigma*random->normal();
-  //float *x = new float[n];
-  for(int i=0;i<n;i++)
-  {
-    a = mu + phi*(a - mu) + sigma*random->normal();
-    x[i] = a + sigmav*random->normal();
-  }
-  delete random;
-}
-
+//
+//
+//
+//
+//
+//  To delete
+//
 void run_1()
 {
   //
@@ -310,42 +317,6 @@ void run_2()
   printf("Done ... \n");
   //
 }
-
-__global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,float *mus,float *phis,float *sigmas,int niter)
-{
-  int idx = blockDim.x*blockIdx.x + threadIdx.x;
-  if(idx < niter)
-  {
-    int nwarmup = 1000;
-    float sigmav = 0.2;
-    float mu = 0.0;
-    float phi = 0.95;
-    float sigma = 0.2;
-    //
-    DLMModel<float> *model = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
-    model->setseed(seed[idx]);
-    //
-    for(int i=0;i<100;i++){
-      model->simulatestates();
-    }
-    // warmup
-    for(int i=0;i<nwarmup;i++){ 
-      model->simulatestates();
-      model->simulatesigmav();
-      model->simulatemu();
-      model->simulatephi();
-      model->simulatesigma();
-    }
-    //
-    sigmavs[idx] = model->simulatesigmav();
-    mus[idx] = model->simulatemu();
-    phis[idx] = model->simulatephi();
-    sigmas[idx] = model->simulatesigma();
-    //
-    delete model;
-  }
-}
-
 
 void run_dlm_gpu()
 {
