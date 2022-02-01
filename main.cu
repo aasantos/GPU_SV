@@ -21,7 +21,7 @@ int main()
   printf("Start .... \n");
   //
   estimate_sv("sp500_ret_80_87.txt",-0.5,0.95,0.2);
-  estimate_svl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.7);
+  //estimate_svl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.7);
   estimate_sv_gpu("sp500_ret_80_87.txt");
   //estimate_svl_gpu("sp500_ret_80_87.txt");
   printf("Done ... \n");

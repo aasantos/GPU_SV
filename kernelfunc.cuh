@@ -87,6 +87,7 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
     sigmas[idx] = model->simulatesigma();
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mus[idx],phis[idx],sigmas[idx]);
     //
     delete model;
   }
@@ -116,13 +117,12 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
       model->simulatestates();
       model->simulatemu();
       model->simulatephi();
-      model->simulatesigma();
+      //model->simulatesigma();
     }
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
-    sigmas[idx] = model->simulatesigma();
-    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mus[idx],phis[idx],sigmas[idx]);
+    //sigmas[idx] = model->simulatesigma();
     //
     delete model;
   }
