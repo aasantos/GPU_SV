@@ -93,41 +93,39 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
 }
 
 
-__global__ void kernel_svl(float *x,int n,unsigned int *seed,float *musimul,float *phisimul,float *sigmasimul,float *rhosimul,int niter)
+__global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *phis,float *sigmas,float *rhos,int niter)
 {
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
-  if(idx < niter){
-    //
+  if(idx < niter)
+  {
     int nwarmup = 1000;
-    float mu = -0.5;
-    float phi = 0.97;
+    float mu = 0.0;
+    float phi = 0.95;
     float sigma = 0.2;
-    float rho = -0.7;
+    float rho = -0.2;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);
     //
     for(int i=0;i<100;i++){
-        model->simulatestates();
+      model->simulatestates();
     }
     //
-    // 
-    for(int i=0;i<nwarmup;i++){
-        model->simulatestates();
-        model->simulatemu();
-        model->simulatephi();
-        model->simulatesigmarho();
+    // warmup
+    for(int i=0;i<nwarmup;i++){ 
+      model->simulatestates();
+      model->simulatemu();
+      model->simulatephi();
+      model->simulatesigma();
     }
     //
-    musimul[idx] = model->simulatemu();
-    phisimul[idx] = model->simulatephi();
-    model->simulatesigmarho();
-    sigmasimul[idx] = model->getsigma();
-    rhosimul[idx] = model->getrho();
+    mus[idx] = model->simulatemu();
+    phis[idx] = model->simulatephi();
+    sigmas[idx] = model->simulatesigma();
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mus[idx],phis[idx],sigmas[idx]);
     //
     delete model;
-    //
-  }// if(idx < niter)
+  }
 }
 
 
