@@ -63,11 +63,74 @@ void simulate_sv(float *x,int n,float mu,float phi,float sigma)
 //
 //estimate SV models
 //
-void estimate_gpu_sv_sp500()
+void estimate_sv(const char *file,float mu,float phi,float sigma)
+{
+    int n;
+    float *x = readArray<float>(file,&n);
+    printf("Number of observations: %d\n",n);
+    //
+    int nwarmup = 5000;
+    int niter = 20000;
+    //
+    SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulatemu();
+        model->simulatephi();
+        model->simulatesigma();
+    }
+    //
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        musimul[i] = model->simulatemu();
+        phisimul[i] = model->simulatephi();
+        sigmasimul[i] = model->simulatesigma();
+    }
+    //
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f\n",mmu,mphi,msigma);
+    //
+    //
+    writeArray<float>(musimul,"musimul.txt",niter);
+    writeArray<float>(phisimul,"phisimul.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    //
+    //
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete model;
+  free(x);
+}
+//
+//
+void estimate_sv_gpu(const char *file)
 {
     printf("Start estimating .... \n");
     int n;
-    float *xi = readArray<float>("sp500_ret_80_87.txt",&n);
+    float *xi = readArray<float>(file,&n);
     //
     float *x;
     cudaMallocManaged(&x,n*sizeof(float));
@@ -95,11 +158,12 @@ void estimate_gpu_sv_sp500()
     float mphi = Vector<float>(phisimul,niter).mean();
     float msigma = Vector<float>(sigmasimul,niter).mean();
     //
-    mumean[k] = mmu;
-    phimean[k] = mphi;
-    sigmamean[k] = msigma;
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
+    //
+    writeArray<float>(musimul,"musimul.txt",niter);
+    writeArray<float>(phisimul,"phisimul.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
     //
     cudaFree(musimul);
     cudaFree(phisimul);
@@ -107,21 +171,16 @@ void estimate_gpu_sv_sp500()
     cudaFree(seed);
     cudaFree(x);
     cudaDeviceReset();
-  //
-  free(xi);
-  printf("Done ... \n");
+    //
+    free(xi);
+    printf("Done ... \n");
 }
 
-void estimate_svl_sp500()
+void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
 {
     int n;
-    float *x = readArray<float>("sp500_ret_80_87.txt",&n);
+    float *x = readArray<float>(file,&n);
     printf("Number of observations: %d\n",n);
-    //
-    float mu = -0.5;
-    float phi = 0.97;
-    float sigma = 0.2;
-    float rho = -0.7;
     //
     int nwarmup = 5000;
     int niter = 20000;
@@ -174,6 +233,11 @@ void estimate_svl_sp500()
     //
     printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f\n",mmu,mphi,msigma,mrho);
     //
+    writeArray<float>(musimul,"musimul.txt",niter);
+    writeArray<float>(phisimul,"phisimul.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    writeArray<float>(rhosimul,"rhosimul.txt",niter);
+    //
     //
     delete[] musimul;
     delete[] phisimul;
@@ -182,8 +246,6 @@ void estimate_svl_sp500()
     delete model;
   free(x);
 }
-//
-//
 //
 //
 //

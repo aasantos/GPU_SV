@@ -18,19 +18,14 @@
 //
 int main()
 {
-  printf("Hello from GPU_DLM\n");
+  printf("Start .... \n");
   //
-  //run_1();
+  //estimate_sv("sp500_ret_80_87.txt",-0.5,0.95,0.2);
+  estimate_sv_gpu("sp500_ret_80_87.txt");
   //
-  //run_2();
+  //estimate_svl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.7);
   //
-  //run_dlm_gpu();
-  //
-  //run_sv_gpu();
-  //
-  //estimate_sv_sp500();
-  //
-  estimate_gpu_sv_sp500();
+  printf("Done ... \n");
   //
   return 0;
 }
