@@ -274,7 +274,7 @@ void estimate_svl_gpu(const char *file)
     srand(time(NULL));
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
     kernel_svl<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
