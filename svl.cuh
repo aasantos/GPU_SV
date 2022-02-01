@@ -224,6 +224,7 @@ public:
         this->phi = reg->simulatebeta();
         delete[] err1;
         delete[] err2;
+        delete reg;
         return this->phi;
     }
     //
