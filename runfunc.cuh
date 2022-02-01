@@ -248,6 +248,60 @@ void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
 }
 //
 //
+void estimate_svl_gpu(const char *file)
+{
+    printf("Start estimating .... \n");
+    int n;
+    float *xi = readArray<float>(file,&n);
+    //
+    float *x;
+    cudaMallocManaged(&x,n*sizeof(float));
+    for(int i=0;i<n;i++) x[i] = xi[i];
+    //
+    int niter = 5000;
+    float *musimul;
+    float *phisimul;
+    float *sigmasimul;
+    float *rhosimul;
+    unsigned int *seed;
+    //
+    cudaMallocManaged(&musimul,niter*sizeof(float));
+    cudaMallocManaged(&phisimul,niter*sizeof(float));
+    cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+    cudaMallocManaged(&rhosimul,niter*sizeof(float));
+    cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+    //
+    srand(time(NULL));
+    for(int i=0;i<niter;i++) seed[i] = rand();
+    //
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
+    kernel_svl<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    cudaDeviceSynchronize();
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mrho = Vector<float>(rhosimul,niter).mean();
+    //
+    //
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f; rho: %.4f\n",mmu,mphi,msigma,mrho);
+    //
+    writeArray<float>(musimul,"musimul.txt",niter);
+    writeArray<float>(phisimul,"phisimul.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    writeArray<float>(rhosimul,"rhosimul.txt",niter);
+    //
+    cudaFree(musimul);
+    cudaFree(phisimul);
+    cudaFree(sigmasimul);
+    cudaFree(rhosimul);
+    cudaFree(seed);
+    cudaFree(x);
+    cudaDeviceReset();
+    //
+    free(xi);
+    printf("Done ... \n");
+}
 //
 //  To delete
 //
