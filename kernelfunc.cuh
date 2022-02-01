@@ -123,6 +123,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
     //sigmas[idx] = model->simulatesigma();
+    printf("mu: %.4f; phi: %.4f\n",mus[idx],phis[idx]);
     //
     delete model;
   }
