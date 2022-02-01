@@ -119,12 +119,12 @@ public:
         return newton(yy,yy0,a0,a1);
     }
     //
-    T stdstate(T yy,T a,T a1)
+    __host__ __device__ T stdstate(T yy,T a,T a1)
     {
         return sqrt(-1.0/ddf(yy,a,a1));
     }
     //
-    T loglik(T yy,T yy0,T a0,T a,T a1)
+    __host__ __device__ T loglik(T yy,T yy0,T a0,T a,T a1)
     {
         T sigmat = this->sigma*sqrtf(1.0 - this->rho*this->rho);
         T t1 = -0.5*a - 0.5*yy*yy*expf(-1.0*a);
