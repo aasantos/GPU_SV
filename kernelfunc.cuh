@@ -118,17 +118,17 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
       model->simulatestates();
       model->simulatemu();
       model->simulatephi();
-      //model->simulatesigma();
+      model->simulatesigmarho();
     }
-    printf("end states adaptation gpu ...\n ");
-    /*
+    //printf("end states adaptation gpu ...\n ");
+    
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
-    //sigmas[idx] = model->simulatesigma();
-    printf("mu: %.4f; phi: %.4f\n",mus[idx],phis[idx]);
+    model->simulatesigmarho();
+    sigmas[idx] = model->getsigma();
+    rhos[idx] = model->getrho();
     //
-    */
     delete model;
   }
 }
