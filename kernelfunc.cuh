@@ -111,7 +111,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     for(int i=0;i<100;i++){
       model->simulatestates();
     }
-    printf("end states adaptation gpu ... ")
+    printf("end states adaptation gpu ... ");
     /*
     //
     // warmup
