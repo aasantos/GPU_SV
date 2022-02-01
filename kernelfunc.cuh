@@ -103,7 +103,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
-    float rho = -0.2;
+    float rho = -0.28;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);
@@ -111,6 +111,8 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     for(int i=0;i<100;i++){
       model->simulatestates();
     }
+    printf("end states adaptation gpu ... ")
+    /*
     //
     // warmup
     for(int i=0;i<nwarmup;i++){ 
@@ -125,6 +127,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     //sigmas[idx] = model->simulatesigma();
     printf("mu: %.4f; phi: %.4f\n",mus[idx],phis[idx]);
     //
+    */
     delete model;
   }
 }
