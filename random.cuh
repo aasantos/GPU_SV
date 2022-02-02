@@ -358,7 +358,7 @@ public:
     }
     //
     //
-    __host__ __device__ int sampleuni(int *x,double *w,int n)
+    __host__ __device__ int sampleuni_int(int *x,double *w,int n)
     {
         int z = 0;
         double *Q = new double[n];

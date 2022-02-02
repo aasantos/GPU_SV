@@ -54,6 +54,15 @@ void writeArray(T *x,const char* file,int n)
     for(int i=0;i<n;i++) fprintf(fp,"%.6f\n",x[i]);
     fclose(fp);
 }
+//
+//
+void writeArray_int(int *x,const char* file,int n)
+{
+    FILE *fp;
+    fp = fopen(file, "wa");
+    for(int i=0;i<n;i++) fprintf(fp,"%d\n",x[i]);
+    fclose(fp);
+}
 
 
 #endif

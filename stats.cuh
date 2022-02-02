@@ -46,18 +46,18 @@ public:
     //
     //
     //calculates the mean
-    __host__ __device__ T mean()
+    __host__ __device__ double mean()
     {
         T mvalue = 0.0;
         for(int i=0;i<this->n;i++){
             mvalue += this->x[i];
         }
-        return mvalue/(double)this->n;
+        return (double)mvalue/(double)this->n;
     }
     //
     //
     //calculates the variance
-    __host__ __device__ T variance()
+    __host__ __device__ double variance()
     {
         T mm = this->mean();
         T msqvalue = 0.0;
@@ -175,7 +175,7 @@ public:
     //
     //
     //tested
-    __host__ __device__ void loglikdfstudentt(int *df,int m,T *z)
+    __host__ __device__ void loglikdfstudentt(int *df,int m,double *z)
     {
         T *w = new T[m];
         for(int i=0;i<m;i++){
@@ -198,13 +198,13 @@ public:
     {
         int m = limsup - liminf + 1;
         int *df = new int[m];
-        T *w = new T[m];
+        double *w = new double[m];
         df[0] = liminf;
         for(int i=1;i<m;i++){
             df[i] = df[i-1] + 1;
         }
         this->loglikdfstudentt(df,m,w);
-        int dft = this->random->sampleuni(df, w, m);
+        int dft = this->random->sampleuni_int(df, w, m);
         delete[] df;
         delete[] w;
         return dft;

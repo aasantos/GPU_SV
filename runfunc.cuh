@@ -1,6 +1,7 @@
 #ifndef runfunc_cuh
 #define runfunc_cuh
-
+//
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -20,7 +21,6 @@
 #include "svl.cuh"
 #include "svtl.cuh"
 #include "kernelfunc.cuh"
-
 //
 //
 //   Simulate from models
@@ -42,7 +42,8 @@ void simulate_dlm(float *x,int n,float sigmav,float mu,float phi,float sigma)
   }
   delete random;
 }
-
+//
+//
 void simulate_sv(float *x,int n,float mu,float phi,float sigma)
 {
   //
@@ -62,6 +63,8 @@ void simulate_sv(float *x,int n,float mu,float phi,float sigma)
 //
 //
 //estimate SV models
+//
+//
 //
 void estimate_sv(const char *file,float mu,float phi,float sigma)
 {
@@ -113,9 +116,9 @@ void estimate_sv(const char *file,float mu,float phi,float sigma)
     printf("mu: %.3f; phi: %.3f; sigma: %.3f\n",mmu,mphi,msigma);
     //
     //
-    writeArray<float>(musimul,"musimul.txt",niter);
-    writeArray<float>(phisimul,"phisimul.txt",niter);
-    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    writeArray<float>(musimul,"musimulsv.txt",niter);
+    writeArray<float>(phisimul,"phisimulsv.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimulsv.txt",niter);
     //
     //
     delete[] musimul;
@@ -126,56 +129,78 @@ void estimate_sv(const char *file,float mu,float phi,float sigma)
 }
 //
 //
-void estimate_sv_gpu(const char *file)
+//
+void estimate_svt(const char *file,float mu,float phi,float sigma,int nu)
 {
-    printf("Start estimating .... \n");
     int n;
-    float *xi = readArray<float>(file,&n);
+    float *x = readArray<float>(file,&n);
+    printf("Number of observations: %d\n",n);
     //
-    float *x;
-    cudaMallocManaged(&x,n*sizeof(float));
-    for(int i=0;i<n;i++) x[i] = xi[i];
+    int nwarmup = 5000;
+    int niter = 20000;
     //
-    int niter = 5000;
-    float *musimul;
-    float *phisimul;
-    float *sigmasimul;
-    unsigned int *seed;
+    SVtModel<float> *model = new SVtModel<float>(x,n,mu,phi,sigma,nu);
     //
-    cudaMallocManaged(&musimul,niter*sizeof(float));
-    cudaMallocManaged(&phisimul,niter*sizeof(float));
-    cudaMallocManaged(&sigmasimul,niter*sizeof(float));
-    cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
     //
-    srand(time(NULL));
-    for(int i=0;i<niter;i++) seed[i] = rand();
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulatemu();
+        model->simulatephi();
+        model->simulatesigma();
+        model->simulatenu();
+    }
     //
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
-    cudaDeviceSynchronize();
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    int *nusimul = new int[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        musimul[i] = model->simulatemu();
+        phisimul[i] = model->simulatephi();
+        sigmasimul[i] = model->simulatesigma();
+        nusimul[i] = model->simulatenu();
+    }
+    //
     //
     float mmu = Vector<float>(musimul,niter).mean();
     float mphi = Vector<float>(phisimul,niter).mean();
     float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mnu = Vector<int>(nusimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f; nu: %.3f\n",mmu,mphi,msigma,mnu);
     //
     //
-    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
+    writeArray<float>(musimul,"musimulsvt.txt",niter);
+    writeArray<float>(phisimul,"phisimulsvt.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimulsvt.txt",niter);
+    writeArray_int(nusimul,"nusimulsvt.txt",niter);
     //
-    writeArray<float>(musimul,"musimul.txt",niter);
-    writeArray<float>(phisimul,"phisimul.txt",niter);
-    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
     //
-    cudaFree(musimul);
-    cudaFree(phisimul);
-    cudaFree(sigmasimul);
-    cudaFree(seed);
-    cudaFree(x);
-    cudaDeviceReset();
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete[] nusimul;
     //
-    free(xi);
-    printf("Done ... \n");
+    delete model;
+  free(x);
 }
-
+//
+//
+//
 void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
 {
     int n;
@@ -233,10 +258,10 @@ void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
     //
     printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f\n",mmu,mphi,msigma,mrho);
     //
-    writeArray<float>(musimul,"musimul.txt",niter);
-    writeArray<float>(phisimul,"phisimul.txt",niter);
-    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
-    writeArray<float>(rhosimul,"rhosimul.txt",niter);
+    writeArray<float>(musimul,"musimulsvl.txt",niter);
+    writeArray<float>(phisimul,"phisimulsvl.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimulsvl.txt",niter);
+    writeArray<float>(rhosimul,"rhosimulsvl.txt",niter);
     //
     //
     delete[] musimul;
@@ -246,6 +271,138 @@ void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
     delete model;
   free(x);
 }
+//
+//
+//
+void estimate_svtl(const char *file,float mu,float phi,float sigma,float rho,int nu)
+{
+    int n;
+    float *x = readArray<float>(file,&n);
+    printf("Number of observations: %d\n",n);
+    //
+    int nwarmup = 5000;
+    int niter = 20000;
+    //
+    SVTLModel<float> *model = new SVTLModel<float>(x,n,mu,phi,sigma,rho,nu);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulatemu();
+        model->simulatephi();
+        model->simulatesigmarho();
+        model->simulatenu();
+    }
+    //
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    float *rhosimul = new float[niter];
+    int *nusimul = new int[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        float mt = model->simulatemu();
+        float pt = model->simulatephi();
+        model->simulatesigmarho();
+        float st = model->getsigma();
+        float rt = model->getrho();
+        musimul[i] = mt;
+        phisimul[i] = pt;
+        sigmasimul[i] = st;
+        rhosimul[i] = rt;
+        nusimul[i] = model->simulatenu();
+    }
+    //
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mrho = Vector<float>(rhosimul,niter).mean();
+    float mnu = Vector<int>(nusimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f; nu: %.3f\n",mmu,mphi,msigma,mrho,mnu);
+    //
+    writeArray<float>(musimul,"musimulsvtl.txt",niter);
+    writeArray<float>(phisimul,"phisimulsvtl.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimulsvtl.txt",niter);
+    writeArray<float>(rhosimul,"rhosimulsvtl.txt",niter);
+    writeArray_int(nusimul,"nusimulsvtl.txt",niter);
+    //
+    //
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete[] rhosimul;
+    delete[] nusimul;
+    delete model;
+  free(x);
+}
+//
+//
+//
+void estimate_sv_gpu(const char *file)
+{
+    printf("Start estimating .... \n");
+    int n;
+    float *xi = readArray<float>(file,&n);
+    //
+    float *x;
+    cudaMallocManaged(&x,n*sizeof(float));
+    for(int i=0;i<n;i++) x[i] = xi[i];
+    //
+    int niter = 5000;
+    float *musimul;
+    float *phisimul;
+    float *sigmasimul;
+    unsigned int *seed;
+    //
+    cudaMallocManaged(&musimul,niter*sizeof(float));
+    cudaMallocManaged(&phisimul,niter*sizeof(float));
+    cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+    cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+    //
+    srand(time(NULL));
+    for(int i=0;i<niter;i++) seed[i] = rand();
+    //
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+    kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    cudaDeviceSynchronize();
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    //
+    //
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
+    //
+    writeArray<float>(musimul,"musimul.txt",niter);
+    writeArray<float>(phisimul,"phisimul.txt",niter);
+    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    //
+    cudaFree(musimul);
+    cudaFree(phisimul);
+    cudaFree(sigmasimul);
+    cudaFree(seed);
+    cudaFree(x);
+    cudaDeviceReset();
+    //
+    free(xi);
+    printf("Done ... \n");
+}
+//
 //
 //
 void estimate_svl_gpu(const char *file)
