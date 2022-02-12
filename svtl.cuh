@@ -13,13 +13,13 @@
 #include "regmodel.cuh"
 #include "ar1model.cuh"
 //
+//
 template <typename T>
 class SVTLModel{
 protected:
     //
     unsigned int n;
     T *x;
-    T *xx;
     T *lambda;
     T *alpha;
     //
@@ -48,9 +48,8 @@ protected:
     //
     //
 public:
-    __host__ __device__ SVTLModel(T *xi,int n,T mu,T phi,T sigma,T rho,int nu)
+    __host__ __device__ SVTLModel(T *x,int n,T mu,T phi,T sigma,T rho,int nu)
     {
-        this->x = x;
         this->n = n;
         this->mu = mu;
         this->phi = phi;
@@ -58,14 +57,11 @@ public:
         this->rho = rho;
         this->nu = nu;
         //
-        this->x = new T[n];
-        this->xx = new T[n];
+        this->x = x;
         this->lambda = new T[n];
         this->alpha = new T[n];
         //
         for(int i=0;i<this->n;i++){
-            this->x[i] = xi[i];
-            this->xx[i] = xi[i];
             this->lambda[i] = 1.0;
             this->alpha[i] = 0.0;
         }
@@ -88,12 +84,6 @@ public:
         }
         if(alpha){
             delete[] alpha;
-        }
-        if(x){
-            delete[] x;
-        }
-        if(xx){
-            delete[] xx;
         }
         if(lambda){
             delete[] lambda;
@@ -171,10 +161,10 @@ public:
     //
     __host__ __device__ T metroprob(T anew,T a,T a0,T a1,T yy,T yy0,T m,T s)
     {
-        T l1 = loglik(yy,yy0,a0,anew,a1);
-        T l0 = loglik(yy,yy0,a0,a,a1);
-        T g0 = lognorm(a,m,s);
-        T g1 = lognorm(anew,m,s);
+        T l1 = this->loglik(yy,yy0,a0,anew,a1);
+        T l0 = this->loglik(yy,yy0,a0,a,a1);
+        T g0 = this->lognorm(a,m,s);
+        T g1 = this->lognorm(anew,m,s);
         T tt = l1 - l0 + g0 - g1;
         if(tt > 0.0) return 1.0;
         if(tt < -10.0){
@@ -184,42 +174,87 @@ public:
         }
     }
     //
+    __host__ __device__ double logpdf1(double lt,double yy,double a,double a1)
+    {
+      double t1 = -0.5*log(lt);
+      double t2 = -0.5*yy*yy/(exp(a)*lt);
+      double tt3 = (a1 - this->mu - this->phi*(a - this->mu) - this->rho*this->sigma*yy*exp(-0.5*a)/sqrt(lt));
+      double t3 = -0.5*tt3*tt3/(this->sigma*this->sigma*(1.0 - this->rho*this->rho));
+      double t4 = -1.0*(0.5*(double)this->nu + 1.0)*log(lt);
+      double t5 = -0.5*((double)this->nu)/lt;
+      return t1 + t2 + t3 + t4 + t5;
+    }
+
+    __host__ __device__ double logpdf2(double lt,double yy,double a)
+    {
+      double t1 = -1.0*(0.5*((double)this->nu +1) + 1.0)*logf(lt);
+      double t2 = -0.5*((double)this->nu + yy*yy*expf(-1.0*a))/lt;
+      return t1 + t2;
+    }
+
+    __host__ __device__ double metroproblambda(double lt1,double lt0,double yy,double a,double a1)
+    {
+      double lpdf1 = logpdf1(lt1, yy, a, a1);
+      double lpdf0 = logpdf1(lt0, yy, a, a1);
+      double lpdf1ap = logpdf2(lt1, yy, a);
+      double lpdf0ap = logpdf2(lt0, yy, a);
+      double tt = lpdf1 - lpdf0 + lpdf0ap - lpdf1ap;
+      if(tt > 0.0) return 1.0;
+      if(tt < -10.0){
+            return 0.0;
+      }else{
+            return exp(tt);
+      }
+    }
     //
     __host__ __device__ void simulatestates()
     {
         for(int i=0;i<this->n;i++){
             if(i==0){
                 this->alpha[i] = this->random->normal(this->mu,this->sigma/sqrt(1.0 - this->phi*this->phi));
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                float tt = 1.0/this->random->gamma(t1,t2);
+                float pm = this->metroproblambda((double)tt,(double)this->lambda[i],(double)this->x[i],(double)this->alpha[i], (double)this->alpha[i+1]);
+                if(this->random->uniform() < pm) this->lambda[i] = tt;
             }else if(i==(n-1)){
-                T yy = this->x[i];
-                T yy0 = this->x[i-1];
+                T lam = this->lambda[i];
+                T lam0 = this->lambda[i-1];
+                T yy = this->x[i]/sqrtf(lam);
+                T yy0 = this->x[i-1]/sqrtf(lam0);
                 this->a0 = this->alpha[i-1];
                 this->a1 = this->mu + this->phi*(this->alpha[i] - this->mu)
                 + this->random->normal(0.0,this->sigma);
-                T mx = meanstate(yy,yy0,a0,a1);
-                T sx = stdstate(yy,mx,a1);
+                T mx = this->meanstate(yy,yy0,this->a0,this->a1);
+                T sx = this->stdstate(yy,mx,this->a1);
                 T atemp = this->random->normal(mx, sx);
-                if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,yy0,mx,sx)){
+                if(this->random->uniform() < this->metroprob(atemp,this->alpha[i],this->a0,this->a1,yy,yy0,mx,sx)){
                     this->alpha[i] = atemp;
                 }
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                float tt = 1.0/this->random->gamma(t1,t2);
+                float pm = this->metroproblambda((double)tt,(double)this->lambda[i],(double)this->x[i],(double)this->alpha[i], (double)this->a1);
+                if(this->random->uniform() < pm) this->lambda[i] = tt;
             }else{
-                T yy = this->x[i];
-                T yy0 = this->x[i-1];
+                T lam = this->lambda[i];
+                T lam0 = this->lambda[i-1];
+                T yy = this->x[i]/sqrtf(lam);
+                T yy0 = this->x[i-1]/sqrtf(lam0);
                 this->a0 = this->alpha[i-1];
                 this->a1 = this->alpha[i+1];
-                T mx = meanstate(yy,yy0,a0,a1);
-                T sx = stdstate(yy,mx,a1);
+                T mx = this->meanstate(yy,yy0,this->a0,this->a1);
+                T sx = this->stdstate(yy,mx,this->a1);
                 T atemp = this->random->normal(mx, sx);
-                if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,yy0,mx,sx)){
+                if(this->random->uniform() < this->metroprob(atemp,this->alpha[i],this->a0,this->a1,yy,yy0,mx,sx)){
                     this->alpha[i] = atemp;
                 }
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                float tt = 1.0/this->random->gamma(t1,t2);
+                float pm = this->metroproblambda((double)tt,(double)this->lambda[i],(double)this->x[i],(double)this->alpha[i], (double)this->a1);
+                if(this->random->uniform() < pm) this->lambda[i] = tt;
             }
-        }
-        for(int i=0;i<this->n;i++){
-            float t1 = 0.5*((T)this->nu + 1.0);
-            float t2 = 0.5*this->xx[i]*this->xx[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
-            this->lambda[i] = 1.0/this->random->gamma(t1,t2);
-            this->x[i] = this->xx[i]/sqrt(this->lambda[i]);
         }
     }
     //
@@ -229,9 +264,11 @@ public:
         int m = this->n - 1;
         float ss = (this->sigma*sqrtf(1.0 - this->rho*this->rho)/(1.0 - this->phi));
         float *err = new float[m];
-        for(int i=0;i<m;i++)
+        for(int i=0;i<m;i++){
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
             err[i] = (this->alpha[i+1] - this->phi*this->alpha[i] -
-                      this->sigma*this->rho*expf(-0.5*this->alpha[i])*this->x[i])/(1.0 - this->phi);
+                      this->sigma*this->rho*expf(-0.5*this->alpha[i])*yy)/(1.0 - this->phi);
+        }
         NormalModel<float> *nm = new NormalModel<float>(err,m,this->mu,ss);
         this->mu = nm->simulatemu();
         delete[] err;
@@ -247,7 +284,8 @@ public:
         float *err1 = new float[m];
         float ss = this->sigma*sqrtf(1.0 - this->rho*this->rho);
         for(int i=0;i<m;i++){
-            err2[i] = (this->alpha[i+1] - this->mu) - this->sigma*this->rho*exp(-0.5*this->alpha[i])*this->x[i];
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
+            err2[i] = (this->alpha[i+1] - this->mu) - this->sigma*this->rho*exp(-0.5*this->alpha[i])*yy;
             err1[i] = (this->alpha[i] - this->mu);
         }
         RegModel<float> *reg = new RegModel<float>(err2,err1,m,0.0,this->phi,ss);
@@ -256,9 +294,9 @@ public:
         this->phi = reg->simulatebeta();
         delete[] err1;
         delete[] err2;
-        delete reg;
         return this->phi;
     }
+    //
     //
     //
     __host__ __device__ void simulatesigmarho()
@@ -270,8 +308,9 @@ public:
         float *y2 = new float[m];
         float *x2 = new float[m];
         for(int i=0;i<m;i++){
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
             y2[i] = this->alpha[i+1] - this->mu - this->phi*(this->alpha[i] - this->mu);
-            x2[i] = this->x[i]*exp(-0.5*this->alpha[i]);
+            x2[i] = yy*exp(-0.5*this->alpha[i]);
         }
         //
         float a11 = 0.0;
@@ -302,11 +341,11 @@ public:
     {
         T *err = new T[this->n];
         for(int i=0;i<this->n;i++){
-            err[i] = this->xx[i]/exp(0.5*this->alpha[i]);
+            err[i] = this->x[i]*exp(-0.5*this->alpha[i]);
         }
         Stats<T> *stats = new Stats<T>(err,n);
-        stats->setSeed(this->seed);
-        this->nu = stats->sampletstudentdf(3,50);
+        stats->setSeed(this->random->rand());
+        this->nu = stats->sampletstudentdf(3,100);
         delete[] err;
         delete stats;
         return this->nu;
@@ -356,7 +395,6 @@ public:
         this->phipriortype = t;
     }
     //
-    //
     __host__ __device__ void setseed(unsigned int ss)
     {
         if(random){
@@ -366,9 +404,6 @@ public:
         this->random = new Random<T>(seed);
     }
     //
-    //
-    
 };
-
 
 #endif

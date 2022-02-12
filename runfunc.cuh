@@ -139,7 +139,7 @@ void estimate_svt(const char *file,float mu,float phi,float sigma,int nu)
     int nwarmup = 5000;
     int niter = 20000;
     //
-    SVtModel<float> *model = new SVtModel<float>(x,n,mu,phi,sigma,nu);
+    SVTModel<float> *model = new SVTModel<float>(x,n,mu,phi,sigma,nu);
     //
     for(int i=0;i<500;i++){
         model->simulatestates();

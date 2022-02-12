@@ -16,13 +16,11 @@
 //
 //
 template <typename T>
-class SVtModel{
+class SVTModel{
 protected:
-    //
     //
     unsigned int n;
     T *x;
-    T *xx;
     T *lambda;
     T *alpha;
     //
@@ -54,7 +52,7 @@ protected:
     //
     //
 public:
-    __host__ __device__ SVtModel(T *xi,int n,T mu,T phi,T sigma,int nu)
+    __host__ __device__ SVTModel(T *x,int n,T mu,T phi,T sigma,int nu)
     {
         this->n = n;
         this->mu = mu;
@@ -62,14 +60,11 @@ public:
         this->sigma = sigma;
         this->nu = nu;
         //
-        this->x = new T[n];
-        this->xx = new T[n];
+        this->x = x;
         this->lambda = new T[n];
         this->alpha = new T[n];
         //
         for(int i=0;i<this->n;i++){
-            this->x[i] = xi[i];
-            this->xx[i] = xi[i];
             this->lambda[i] = 1.0;
             this->alpha[i] = 0.0;
         }
@@ -85,16 +80,10 @@ public:
         this->random = new Random<T>(this->seed);
     }
     //
-    __host__ __device__ ~SVtModel()
+    __host__ __device__ ~SVTModel()
     {
         if(random){
             delete random;
-        }
-        if(x){
-            delete[] x;
-        }
-        if(xx){
-            delete[] xx;
         }
         if(lambda){
             delete[] lambda;
@@ -115,7 +104,7 @@ public:
     __host__ __device__ T ddf(T yy,T a)
     {
         T sigmasq = this->sigma*this->sigma;
-        return -0.5*yy*yy/exp(a) - (1.0 + this->phi*this->phi)/sigmasq;
+        return -0.5*yy*yy*exp(-1.0*a) - (1.0 + this->phi*this->phi)/sigmasq;
     }
     //
     __host__ __device__ T newton(T yy,T a0,T a1)
@@ -145,7 +134,7 @@ public:
     __host__ __device__ T loglik(T yy,T a0,T a,T a1)
     {
         T sigmasq = this->sigma*this->sigma;
-        T t1 = -0.5*a - 0.5*yy*yy/exp(a);
+        T t1 = -0.5*a - 0.5*yy*yy*exp(-1.0*a);
         T err2 = (a1 - this->mu - this->phi*(a - this->mu));
         T t2 = -0.5*err2*err2/sigmasq;
         T err3 = (a - this->mu - this->phi*(a0 - this->mu));
@@ -178,7 +167,8 @@ public:
     __host__ __device__ void simulatestates()
     {
         for(int i=0;i<this->n;i++){
-            T yy = this->x[i];
+            T lam = this->lambda[i];
+            T yy = this->x[i]/sqrtf(lam);
             if(i==0){
                 this->a0 = this->random->normal(this->mu,this->sigma/sqrt(1.0 - this->phi*this->phi));
                 this->a1 = this->alpha[i+1];
@@ -188,6 +178,9 @@ public:
                 if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
                     this->alpha[i] = atemp;
                 }
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                this->lambda[i] = 1.0/this->random->gamma(t1,t2);
             }else if(i==(n-1)){
                 this->a0 = this->alpha[i-1];
                 this->a1 = this->mu + this->phi*(this->alpha[i] - this->mu)
@@ -198,6 +191,9 @@ public:
                 if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
                     this->alpha[i] = atemp;
                 }
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                this->lambda[i] = 1.0/this->random->gamma(t1,t2);
             }else{
                 this->a0 = this->alpha[i-1];
                 this->a1 = this->alpha[i+1];
@@ -207,13 +203,11 @@ public:
                 if(this->random->uniform() < metroprob(atemp,this->alpha[i],a0,a1,yy,mx,sx)){
                     this->alpha[i] = atemp;
                 }
+                float t1 = 0.5*((T)this->nu + 1.0);
+                float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
+                this->lambda[i] = 1.0/this->random->gamma(t1,t2);
             }
-        }
-        for(int i=0;i<this->n;i++){
-            float t1 = 0.5*((T)this->nu + 1.0);
-            float t2 = 0.5*this->xx[i]*this->xx[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
-            this->lambda[i] = 1.0/this->random->gamma(t1,t2);
-            this->x[i] = this->xx[i]/sqrt(this->lambda[i]);
+            
         }
     }
     //
@@ -258,11 +252,11 @@ public:
     {
         T *err = new T[this->n];
         for(int i=0;i<this->n;i++){
-            err[i] = this->xx[i]/exp(0.5*this->alpha[i]);
+            err[i] = this->x[i]*exp(-0.5*this->alpha[i]);
         }
-        Stats<T> *stats = new Stats<T>(err,n);
-        stats->setSeed(this->seed);
-        this->nu = stats->sampletstudentdf(3,50);
+        Stats<T> *stats = new Stats<T>(err,this->n);
+        stats->setSeed(this->random->rand());
+        this->nu = stats->sampletstudentdf(3,100);
         delete[] err;
         delete stats;
         return this->nu;
@@ -323,6 +317,7 @@ public:
         this->random = new Random<T>(seed);
     }
 };
+
 
 
 #endif
