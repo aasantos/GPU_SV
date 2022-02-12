@@ -385,7 +385,7 @@ void estimate_sv_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 5000;
+    int niter = 7500;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -400,7 +400,7 @@ void estimate_sv_gpu(const char *file)
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    kernel_sv<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    kernel_sv<<<64,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -410,9 +410,11 @@ void estimate_sv_gpu(const char *file)
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
     //
-    writeArray<float>(musimul,"musimul.txt",niter);
-    writeArray<float>(phisimul,"phisimul.txt",niter);
-    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
+    FILE *fp;
+    fp = fopen("svestimgpu.txt", "wa");
+    fprintf(fp,"mu phi sigma\n");
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %d\n",musimul[i],phisimul[i],sigmasimul[i]);
+    fclose(fp);
     //
     cudaFree(musimul);
     cudaFree(phisimul);
@@ -437,7 +439,7 @@ void estimate_svl_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 5000;
+    int niter = 7500;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -454,7 +456,7 @@ void estimate_svl_gpu(const char *file)
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    kernel_svl<<<512,128>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    kernel_svl<<<64,128>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -465,10 +467,11 @@ void estimate_svl_gpu(const char *file)
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f; rho: %.4f\n",mmu,mphi,msigma,mrho);
     //
-    writeArray<float>(musimul,"musimul.txt",niter);
-    writeArray<float>(phisimul,"phisimul.txt",niter);
-    writeArray<float>(sigmasimul,"sigmasimul.txt",niter);
-    writeArray<float>(rhosimul,"rhosimul.txt",niter);
+    FILE *fp;
+    fp = fopen("svlestimgpu.txt", "wa");
+    fprintf(fp,"mu phi sigma rho\n");
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %.4f\n",musimul[i],phisimul[i],sigmasimul[i],rhosimul[i]);
+    fclose(fp);
     //
     cudaFree(musimul);
     cudaFree(phisimul);
