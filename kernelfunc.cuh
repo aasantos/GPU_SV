@@ -64,7 +64,7 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2500;
+    int nwarmup = 2000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -72,7 +72,7 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
     SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
     model->setseed(seed[idx]);
     //
-    for(int i=0;i<50;i++){
+    for(int i=0;i<100;i++){
       model->simulatestates();
     }
     //
@@ -99,7 +99,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2500;
+    int nwarmup = 2000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -108,7 +108,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);
     //
-    for(int i=0;i<50;i++){
+    for(int i=0;i<100;i++){
       model->simulatestates();
     }
     //
