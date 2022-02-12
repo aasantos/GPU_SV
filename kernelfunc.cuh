@@ -27,7 +27,7 @@ __global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,floa
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 1000;
+    int nwarmup = 5000;
     float sigmav = 0.2;
     float mu = 0.0;
     float phi = 0.95;
@@ -64,7 +64,7 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2000;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -99,11 +99,11 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2000;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
-    float rho = -0.28;
+    float rho = -0.5;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);
