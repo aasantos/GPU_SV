@@ -35,16 +35,16 @@ public:
         return res;
     }
     
-    __host__ __device__ T mean()
+    __host__ __device__ float mean()
     {
-        T ss = sum();
-        return ss/(double)n;
+        float ss = (float)this->sum();
+        return ss/(float)n;
     }
     
-    __host__ __device__ T variance()
+    __host__ __device__ float variance()
     {
-        T mm = mean();
-        return sumsq()/(double)n - mm*mm;
+        float mm = this->mean();
+        return sumsq()/(float)n - mm*mm;
     }
     
     __host__ __device__ int length()

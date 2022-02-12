@@ -46,39 +46,39 @@ public:
     //
     //
     //calculates the mean
-    __host__ __device__ double mean()
+    __host__ __device__ float mean()
     {
-        T mvalue = 0.0;
+        float mvalue = 0.0;
         for(int i=0;i<this->n;i++){
-            mvalue += this->x[i];
+            mvalue += (float)this->x[i];
         }
-        return (double)mvalue/(double)this->n;
+        return mvalue/(float)this->n;
     }
     //
     //
     //calculates the variance
-    __host__ __device__ double variance()
+    __host__ __device__ float variance()
     {
-        T mm = this->mean();
-        T msqvalue = 0.0;
+        float mm = this->mean();
+        float msqvalue = 0.0;
         for(int i=0;i<this->n;i++){
-            msqvalue += this->x[i]*this->x[i];
+            msqvalue += (float)(this->x[i]*this->x[i]);
         }
-        msqvalue /= (double)this->n;
+        msqvalue /= (float)this->n;
         return msqvalue - mm*mm;
     }
     //
     //
     //
-    __host__ __device__ T kurtosis()
+    __host__ __device__ float kurtosis()
     {
-        T mm = this->mean();
-        T vv = this->variance();
-        T value = 0.0;
+        float mm = this->mean();
+        float vv = this->variance();
+        float value = 0.0;
         for(int i=0;i<this->n;i++){
-            value += pow((this->x[i] - mm),4.0);
+            value += pow(((float)this->x[i] - mm),4.0);
         }
-        value /= (double)this->n;
+        value /= (float)this->n;
         return value/(vv*vv);
     }
     //
