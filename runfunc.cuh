@@ -413,7 +413,7 @@ void estimate_sv_gpu(const char *file)
     FILE *fp;
     fp = fopen("svestimgpu.txt", "wa");
     fprintf(fp,"mu phi sigma\n");
-    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %d\n",musimul[i],phisimul[i],sigmasimul[i]);
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f\n",musimul[i],phisimul[i],sigmasimul[i]);
     fclose(fp);
     //
     cudaFree(musimul);
