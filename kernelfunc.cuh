@@ -160,7 +160,7 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
       model->simulatemu();
       model->simulatephi();
       model->simulatesigmarho();
-      model->simultenu();
+      model->simulatenu();
     }
     //printf("end states adaptation gpu ...\n ");
     
