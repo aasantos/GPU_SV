@@ -57,8 +57,8 @@ public:
         this->phidiffuse = false;
         this->sigmadiffuse = false;
         this->phipriortype = 1;
-        this->muprior[0] = 0.0; this->muprior[1] = 10.0;
-        this->phiprior[0] = 25.0; this->phiprior[1] = 2.5;
+        this->muprior[0] = 0.0; this->muprior[1] = 2.0;
+        this->phiprior[0] = 97.0; this->phiprior[1] = 3.0;
         this->sigmaprior[0] = 2.5; this->sigmaprior[1] = 0.025;
         this->seed = 79798;
         this->random = new Random<T>(this->seed);

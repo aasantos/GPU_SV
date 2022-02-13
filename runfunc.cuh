@@ -385,7 +385,7 @@ void estimate_sv_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 7500;
+    int niter = 15000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -400,7 +400,7 @@ void estimate_sv_gpu(const char *file)
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    kernel_sv<<<64,128>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    kernel_sv<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -439,7 +439,7 @@ void estimate_svl_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 7500;
+    int niter = 15000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -456,7 +456,7 @@ void estimate_svl_gpu(const char *file)
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    kernel_svl<<<64,128>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    kernel_svl<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
