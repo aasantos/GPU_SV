@@ -515,7 +515,7 @@ void estimate_svtl_gpu(const char *file)
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
-    kernel_svl<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    kernel_svtl<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,nusimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -536,6 +536,61 @@ void estimate_svtl_gpu(const char *file)
     cudaFree(phisimul);
     cudaFree(sigmasimul);
     cudaFree(rhosimul);
+    cudaFree(nusimul);
+    cudaFree(seed);
+    cudaFree(x);
+    cudaDeviceReset();
+    //
+    free(xi);
+    printf("Done ... \n");
+}
+//
+void estimate_svt_gpu(const char *file)
+{
+    printf("Start estimating .... \n");
+    int n;
+    float *xi = readArray<float>(file,&n);
+    //
+    float *x;
+    cudaMallocManaged(&x,n*sizeof(float));
+    for(int i=0;i<n;i++) x[i] = xi[i];
+    //
+    int niter = 10000;
+    float *musimul;
+    float *phisimul;
+    float *sigmasimul;
+    int *nusimul;
+    unsigned int *seed;
+    //
+    cudaMallocManaged(&musimul,niter*sizeof(float));
+    cudaMallocManaged(&phisimul,niter*sizeof(float));
+    cudaMallocManaged(&sigmasimul,niter*sizeof(float));
+    cudaMallocManaged(&nusimul,niter*sizeof(int));
+    cudaMallocManaged(&seed,niter*sizeof(unsigned int));
+    //
+    srand(time(NULL));
+    for(int i=0;i<niter;i++) seed[i] = rand();
+    //
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
+    kernel_svt<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,nusimul,niter);
+    cudaDeviceSynchronize();
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    //
+    //
+    printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
+    //
+    FILE *fp;
+    fp = fopen("svtestimgpu.txt", "wa");
+    fprintf(fp,"mu phi sigma rho nu\n");
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %d\n",musimul[i],phisimul[i],sigmasimul[i],nusimul[i]);
+    fclose(fp);
+    //
+    cudaFree(musimul);
+    cudaFree(phisimul);
+    cudaFree(sigmasimul);
     cudaFree(nusimul);
     cudaFree(seed);
     cudaFree(x);
