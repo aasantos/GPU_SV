@@ -399,7 +399,7 @@ void estimate_sv_gpu(const char *file)
     srand(time(NULL));
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
     kernel_sv<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
@@ -455,7 +455,7 @@ void estimate_svl_gpu(const char *file)
     srand(time(NULL));
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
     kernel_svl<<<32,512>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
