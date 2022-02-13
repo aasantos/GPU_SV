@@ -27,6 +27,7 @@ int main()
   estimate_sv_gpu("sp500_ret_80_87.txt");
   estimate_svl_gpu("sp500_ret_80_87.txt");
   estimate_svtl_gpu("sp500_ret_80_87.txt");
+  estimate_svt_gpu("sp500_ret_80_87.txt");
   //
   //
   printf("Done ... \n");
