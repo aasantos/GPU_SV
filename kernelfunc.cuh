@@ -132,6 +132,49 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     delete model;
   }
 }
+//
+//
+__global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *phis,float *sigmas,float *rhos,int *nus,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < niter)
+  {
+    int nwarmup = 5000;
+    float mu = 0.0;
+    float phi = 0.95;
+    float sigma = 0.2;
+    float rho = -0.5;
+    int nu = 20;
+    //
+    SVTLModel<float> *model = new SVTLModel<float>(x,n,mu,phi,sigma,rho,nu);
+    model->setseed(seed[idx]);
+    //
+    for(int i=0;i<100;i++){
+      model->simulatestates();
+    }
+    //
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){ 
+      model->simulatestates();
+      model->simulatemu();
+      model->simulatephi();
+      model->simulatesigmarho();
+      model->simultenu();
+    }
+    //printf("end states adaptation gpu ...\n ");
+    
+    //
+    mus[idx] = model->simulatemu();
+    phis[idx] = model->simulatephi();
+    model->simulatesigmarho();
+    sigmas[idx] = model->getsigma();
+    rhos[idx] = model->getrho();
+    nus[idx] = model->simulatenu();
+    //
+    delete model;
+  }
+}
 
 
 
