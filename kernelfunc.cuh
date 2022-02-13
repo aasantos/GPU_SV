@@ -165,7 +165,7 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
-    sigmas[idx] = model->getsigma();
+    sigmas[idx] = model->simulatesigma();
     nus[idx] = model->simulatenu();
     //
     delete model;
