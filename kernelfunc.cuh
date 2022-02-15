@@ -64,17 +64,13 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 5000;
+    int nwarmup = 500;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
-    float *phiprior = new float[2];
-    phiprior[0] = 90.0;
-    phiprior[1] = 10.0;
     //
     SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
     model->setseed(seed[idx]);
-    model->setphiprior(phiprior);
     //
     for(int i=0;i<100;i++){
       model->simulatestates();
@@ -93,7 +89,6 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
     sigmas[idx] = model->simulatesigma();
     //printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mus[idx],phis[idx],sigmas[idx]);
     //
-    delete[] phiprior;
     delete model;
   }
 }
@@ -110,13 +105,9 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     float sigma = 0.2;
     float rho = -0.5;
     //
-    float *phiprior = new float[2];
-    phiprior[0] = 90.0;
-    phiprior[1] = 10.0;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     model->setseed(seed[idx]);
-    model->setphiprior(phiprior);
     //
     for(int i=0;i<100;i++){
       model->simulatestates();
@@ -139,7 +130,6 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
     sigmas[idx] = model->getsigma();
     rhos[idx] = model->getrho();
     //
-    delete[] phiprior;
     delete model;
   }
 }
@@ -156,13 +146,9 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
     float sigma = 0.2;
     int nu = 20;
     //
-    float *phiprior = new float[2];
-    phiprior[0] = 90.0;
-    phiprior[1] = 10.0;
     //
     SVTModel<float> *model = new SVTModel<float>(x,n,mu,phi,sigma,nu);
     model->setseed(seed[idx]);
-    model->setphiprior(phiprior);
     //
     for(int i=0;i<100;i++){
       model->simulatestates();
@@ -183,7 +169,6 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
     sigmas[idx] = model->simulatesigma();
     nus[idx] = model->simulatenu();
     //
-    delete[] phiprior;
     delete model;
   }
 }
@@ -202,13 +187,9 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
     int nu = 20;
     //
     //
-    float *phiprior = new float[2];
-    phiprior[0] = 90.0;
-    phiprior[1] = 10.0;
     //
     SVTLModel<float> *model = new SVTLModel<float>(x,n,mu,phi,sigma,rho,nu);
     model->setseed(seed[idx]);
-    model->setphiprior(phiprior);
     //
     for(int i=0;i<100;i++){
       model->simulatestates();
@@ -232,7 +213,6 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
     rhos[idx] = model->getrho();
     nus[idx] = model->simulatenu();
     //
-    delete[] phiprior;
     delete model;
   }
 }
