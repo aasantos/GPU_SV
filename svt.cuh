@@ -256,7 +256,7 @@ public:
         }
         Stats<T> *stats = new Stats<T>(err,this->n);
         stats->setSeed(this->random->rand());
-        this->nu = stats->sampletstudentdf(3,100);
+        this->nu = stats->sampletstudentdf(3,50);
         delete[] err;
         delete stats;
         return this->nu;

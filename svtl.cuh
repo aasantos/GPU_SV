@@ -68,11 +68,9 @@ public:
         this->a0 = 0.0; this->a1 = 0.0;
         this->mudiffuse = false;
         this->phidiffuse = false;
-        //this->sigmadiffuse = false;
-        this->phipriortype = 1;
+        this->phipriortype = 0;
         this->muprior[0] = 0.0; this->muprior[1] = 10.0;
-        this->phiprior[0] = 25.0; this->phiprior[1] = 2.5;
-        //this->sigmaprior[0] = 2.5; this->sigmaprior[1] = 0.025;
+        this->phiprior[0] = 0.9; this->phiprior[1] = 1.0;
         this->seed = 79798;
         this->random = new Random<T>(this->seed);
     }
@@ -289,9 +287,11 @@ public:
             err1[i] = (this->alpha[i] - this->mu);
         }
         RegModel<float> *reg = new RegModel<float>(err2,err1,m,0.0,this->phi,ss);
-        reg->setbetapriortype(1);
+        reg->setbetapriortype(this->phipriortype);
         reg->setbetaprior(this->phiprior);
         this->phi = reg->simulatebeta();
+        if(this->phi > 0.999) this->phi = 0.999;
+        if(this->phi < 0.0) this->phi = 0.0;
         delete[] err1;
         delete[] err2;
         return this->phi;
@@ -345,7 +345,7 @@ public:
         }
         Stats<T> *stats = new Stats<T>(err,n);
         stats->setSeed(this->random->rand());
-        this->nu = stats->sampletstudentdf(3,100);
+        this->nu = stats->sampletstudentdf(3,60);
         delete[] err;
         delete stats;
         return this->nu;

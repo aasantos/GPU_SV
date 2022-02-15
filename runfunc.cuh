@@ -116,9 +116,6 @@ void estimate_sv(const char *file,float mu,float phi,float sigma)
     printf("mu: %.3f; phi: %.3f; sigma: %.3f\n",mmu,mphi,msigma);
     //
     //
-    //writeArray<float>(musimul,"musimulsv.txt",niter);
-    //writeArray<float>(phisimul,"phisimulsv.txt",niter);
-    //writeArray<float>(sigmasimul,"sigmasimulsv.txt",niter);
     //
     FILE *fp;
     fp = fopen("svestim.txt", "wa");
@@ -188,11 +185,6 @@ void estimate_svt(const char *file,float mu,float phi,float sigma,int nu)
     //
     printf("mu: %.3f; phi: %.3f; sigma: %.3f; nu: %.3f\n",mmu,mphi,msigma,mnu);
     //
-    //
-    //writeArray<float>(musimul,"musimulsvt.txt",niter);
-    //writeArray<float>(phisimul,"phisimulsvt.txt",niter);
-    //writeArray<float>(sigmasimul,"sigmasimulsvt.txt",niter);
-    //writeArray_int(nusimul,"nusimulsvt.txt",niter);
     //
     FILE *fp;
     fp = fopen("svtestim.txt", "wa");
@@ -268,10 +260,7 @@ void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
     //
     printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f\n",mmu,mphi,msigma,mrho);
     //
-   //writeArray<float>(musimul,"musimulsvl.txt",niter);
-   //writeArray<float>(phisimul,"phisimulsvl.txt",niter);
-   //writeArray<float>(sigmasimul,"sigmasimulsvl.txt",niter);
-   //writeArray<float>(rhosimul,"rhosimulsvl.txt",niter);
+    //
     FILE *fp;
     fp = fopen("svlestim.txt", "wa");
     fprintf(fp,"mu phi sigma rho\n");
@@ -350,11 +339,6 @@ void estimate_svtl(const char *file,float mu,float phi,float sigma,float rho,int
     //
     printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f; nu: %.3f\n",mmu,mphi,msigma,mrho,mnu);
     //
-    //writeArray<float>(musimul,"musimulsvtl.txt",niter);
-    //writeArray<float>(phisimul,"phisimulsvtl.txt",niter);
-    //writeArray<float>(sigmasimul,"sigmasimulsvtl.txt",niter);
-    //writeArray<float>(rhosimul,"rhosimulsvtl.txt",niter);
-    //writeArray_int(nusimul,"nusimulsvtl.txt",niter);
     //
     //
     FILE *fp;

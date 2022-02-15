@@ -177,7 +177,6 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
       model->simulatenu();
     }
     //printf("end states adaptation gpu ...\n ");
-    
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
@@ -224,8 +223,7 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
       model->simulatesigmarho();
       model->simulatenu();
     }
-    //printf("end states adaptation gpu ...\n ");
-    
+    //printf("end states adaptation gpu ...\n "); 
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
