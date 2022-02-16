@@ -181,7 +181,7 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
   {
     //
     //
-    int nwarmup = 100;
+    int nwarmup = 500;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
