@@ -511,7 +511,7 @@ void estimate_svtl_gpu(const char *file)
     //
     double time_spent = 0.0;
     clock_t begin = clock();
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
     kernel_svtl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,nusimul,niter);
     cudaDeviceSynchronize();
     //
@@ -573,7 +573,7 @@ void estimate_svt_gpu(const char *file)
     //
     double time_spent = 0.0;
     clock_t begin = clock();
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,5242880000L);
     kernel_svt<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,nusimul,niter);
     cudaDeviceSynchronize();
     //
