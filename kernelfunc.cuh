@@ -155,16 +155,13 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
     // warmup
     for(int i=0;i<nwarmup;i++){ 
       model->simulatestates();
-      model->simulatemu();
-      model->simulatephi();
-      model->simulatenu();
+      model->simulateparameters();
     }
-    //printf("end states adaptation gpu ...\n ");
     //
-    mus[idx] = model->simulatemu();
-    phis[idx] = model->simulatephi();
-    sigmas[idx] = model->simulatesigma();
-    nus[idx] = model->simulatenu();
+    mus[idx] = model->getmu();
+    phis[idx] = model->getphi();
+    sigmas[idx] = model->getsigma();
+    nus[idx] = model->getnu();
     //
     delete model;
   }
