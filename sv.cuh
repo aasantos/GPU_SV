@@ -202,7 +202,7 @@ public:
             T err = (this->alpha[j+1] - this->mu) - this->phi*(this->alpha[j] - this->mu);
             errsq += err*err;
         }
-        this->sigma = 1.0/sqrtf(this->random->gamma(0.5*(float)this->n),0.5*errsq);
+        this->sigma = 1.0/sqrtf(this->random->gamma(0.5*(float)this->n,0.5*errsq));
         //
         T mmu = 0.0;
         for(int j=0;j<m;j++) mmu += (this->alpha[j+1] - this->phi*this->alpha[j])/(1.0 - this->phi);
