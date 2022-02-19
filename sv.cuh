@@ -181,6 +181,37 @@ public:
         }
     }
     //
+    __host__ __device__ void simulateparameters()
+    {
+        //
+        int m = this->n - 1;
+        T num = 0.0;
+        T den = 0.0;
+        //
+        for(int j=0;j<m;j++){
+            T err1 = (this->alpha[j+1] - this->mu);
+            T err2 = (this->alpha[j] - this->mu);
+            num += err1*err2;
+            den += err2*err2;
+        }
+        this->phi = (num/den) + (this->sigma/sqrtf(den))*this->random->normal();
+        if(this->phi > 0.999) this->phi = 0.999;
+        //
+        T errsq = 0.0;
+        for(int j=0;j<m;j++){
+            T err = (this->alpha[j+1] - this->mu) - this->phi*(this->alpha[j] - this->mu);
+            errsq += err*err;
+        }
+        this->sigma = 1.0/sqrtf(this->random->gamma(0.5*(float)this->n),0.5*errsq);
+        //
+        T mmu = 0.0;
+        for(int j=0;j<m;j++) mmu += (this->alpha[j+1] - this->phi*this->alpha[j])/(1.0 - this->phi);
+        mmu /= (float)m;
+        this->mu = mmu + (this->sigma/(1.0 - this->phi))*this->random->normal();
+        //
+        //
+    }
+    //
     __host__ __device__ T simulatemu()
     {
         AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
@@ -271,6 +302,26 @@ public:
         this->seed = ss;
         this->random = new Random<T>(seed);
     }
+    //
+    //
+    __host__ __device__ T getmu()
+    {
+        return this->mu;
+    }
+    //
+    //
+    __host__ __device__ T getphi()
+    {
+        return this->phi;
+    }
+    //
+    //
+    __host__ __device__ T getsigma()
+    {
+        return this->sigma;
+    }
+    //
+    //
 };
 
 #endif
