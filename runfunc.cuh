@@ -361,7 +361,7 @@ void estimate_svtl(const char *file,float mu,float phi,float sigma,float rho,int
 //
 void estimate_sv_gpu(const char *file)
 {
-    printf("Start estimating .... \n");
+    printf("Start estimating SV .... \n");
     int n;
     float *xi = readArray<float>(file,&n);
     //
@@ -415,7 +415,7 @@ void estimate_sv_gpu(const char *file)
 //
 void estimate_svl_gpu(const char *file)
 {
-    printf("Start estimating .... \n");
+    printf("Start estimating SVL .... \n");
     int n;
     float *xi = readArray<float>(file,&n);
     //
@@ -472,7 +472,7 @@ void estimate_svl_gpu(const char *file)
 //
 void estimate_svtl_gpu(const char *file)
 {
-    printf("Start estimating .... \n");
+    printf("Start estimating SVTL .... \n");
     int n;
     float *xi = readArray<float>(file,&n);
     //
@@ -531,7 +531,7 @@ void estimate_svtl_gpu(const char *file)
 //
 void estimate_svt_gpu(const char *file)
 {
-    printf("Start estimating .... \n");
+    printf("Start estimating SVT .... \n");
     int n;
     float *xi = readArray<float>(file,&n);
     //
