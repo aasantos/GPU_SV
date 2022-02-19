@@ -193,7 +193,7 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
     SVTLModel<float> *model = new SVTLModel<float>(x,n,mu,phi,sigma,rho,nu);
     model->setseed(seed[idx]);
     //
-    for(int i=0;i<50;i++){
+    for(int i=0;i<100;i++){
       model->simulatestates();
     }
     //
