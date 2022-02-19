@@ -204,10 +204,16 @@ public:
         }
         this->sigma = 1.0/sqrtf(this->random->gamma(0.5*(float)this->n,0.5*errsq));
         //
-        T mmu = 0.0;
-        for(int j=0;j<m;j++) mmu += (this->alpha[j+1] - this->phi*this->alpha[j])/(1.0 - this->phi);
-        mmu /= (float)m;
-        this->mu = mmu + (this->sigma/(1.0 - this->phi))*this->random->normal();
+        //T mmu = 0.0;
+        //for(int j=0;j<m;j++) mmu += (this->alpha[j+1] - this->phi*this->alpha[j])/(1.0 - this->phi);
+        //mmu /= (float)m;
+        //this->mu = mmu + (this->sigma/(1.0 - this->phi))*this->random->normal();
+        AR1Model<T> *ar1 = new AR1Model<T>(this->alpha,this->n,this->mu,this->phi,this->sigma);
+        ar1->setseed(this->random->rand());
+        ar1->setmudiffuse(this->mudiffuse);
+        ar1->setmuprior(this->muprior);
+        this->mu = ar1->simulatemu();
+        delete ar1;
         //
         //
     }
