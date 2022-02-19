@@ -79,15 +79,12 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
     // warmup
     for(int i=0;i<nwarmup;i++){ 
       model->simulatestates();
-      model->simulatemu();
-      model->simulatephi();
-      model->simulatesigma();
+      model->simulateparameters();
     }
     //
-    mus[idx] = model->simulatemu();
-    phis[idx] = model->simulatephi();
-    sigmas[idx] = model->simulatesigma();
-    //printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mus[idx],phis[idx],sigmas[idx]);
+    mus[idx] = model->getmu();
+    phis[idx] = model->getphi();
+    sigmas[idx] = model->getsigma();
     //
     delete model;
   }
