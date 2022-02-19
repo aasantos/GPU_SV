@@ -383,14 +383,20 @@ void estimate_sv_gpu(const char *file)
     srand(time(NULL));
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
+    double time_spent = 0.0;
+    clock_t begin = clock();
+    //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
-    kernel_sv<<<16,512>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    kernel_sv<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
     float mphi = Vector<float>(phisimul,niter).mean();
     float msigma = Vector<float>(sigmasimul,niter).mean();
     //
+    clock_t end = clock();
+    time_spent += (double)(end - begin) / CLOCKS_PER_SEC; 
+    printf("The elapsed time is %f seconds\n", time_spent);
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f\n",mmu,mphi,msigma);
     //
@@ -439,8 +445,10 @@ void estimate_svl_gpu(const char *file)
     srand(time(NULL));
     for(int i=0;i<niter;i++) seed[i] = rand();
     //
+    double time_spent = 0.0;
+    clock_t begin = clock();
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
-    kernel_svl<<<16,512>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    kernel_svl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -448,6 +456,9 @@ void estimate_svl_gpu(const char *file)
     float msigma = Vector<float>(sigmasimul,niter).mean();
     float mrho = Vector<float>(rhosimul,niter).mean();
     //
+    clock_t end = clock();
+    time_spent += (double)(end - begin) / CLOCKS_PER_SEC; 
+    printf("The elapsed time is %f seconds\n", time_spent);
     //
     printf("mu: %.4f; phi: %.4f; sigma: %.4f; rho: %.4f\n",mmu,mphi,msigma,mrho);
     //
