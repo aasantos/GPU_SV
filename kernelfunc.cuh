@@ -194,19 +194,14 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
     // warmup
     for(int i=0;i<nwarmup;i++){ 
       model->simulatestates();
-      model->simulatemu();
-      model->simulatephi();
-      model->simulatesigmarho();
-      model->simulatenu();
+      model->simulateparameters();
     }
-    //printf("end states adaptation gpu ...\n "); 
     //
-    mus[idx] = model->simulatemu();
-    phis[idx] = model->simulatephi();
-    model->simulatesigmarho();
+    mus[idx] = model->getmu();
+    phis[idx] = model->getphi();
     sigmas[idx] = model->getsigma();
     rhos[idx] = model->getrho();
-    nus[idx] = model->simulatenu();
+    nus[idx] = model->getnu();
     //
     delete model;
   }
