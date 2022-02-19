@@ -257,6 +257,85 @@ public:
     }
     //
     //
+    __host__ __device__ void simulateparameters()
+    {
+        int m = this->n - 1;
+        float ss = (this->sigma*sqrtf(1.0 - this->rho*this->rho)/(1.0 - this->phi));
+        float *err = new float[m];
+        for(int i=0;i<m;i++){
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
+            err[i] = (this->alpha[i+1] - this->phi*this->alpha[i] -
+                      this->sigma*this->rho*expf(-0.5*this->alpha[i])*yy)/(1.0 - this->phi);
+        }
+        NormalModel<float> *nm = new NormalModel<float>(err,m,this->mu,ss);
+        this->mu = nm->simulatemu();
+        delete[] err;
+        delete nm;
+        //
+        float *err2 = new float[m];
+        float *err1 = new float[m];
+        float ss1 = this->sigma*sqrtf(1.0 - this->rho*this->rho);
+        for(int i=0;i<m;i++){
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
+            err2[i] = (this->alpha[i+1] - this->mu) - this->sigma*this->rho*exp(-0.5*this->alpha[i])*yy;
+            err1[i] = (this->alpha[i] - this->mu);
+        }
+        RegModel<float> *reg = new RegModel<float>(err2,err1,m,0.0,this->phi,ss1);
+        reg->setbetapriortype(0);
+        reg->setbetaprior(this->phiprior);
+        this->phi = reg->simulatebeta();
+        if(this->phi > 0.999) this->phi = 0.999;
+        delete[] err1;
+        delete[] err2;
+        delete reg;
+        //
+        float psi = this->sigma*this->rho;
+        float Omega = this->sigma*this->sigma - this->sigma*this->sigma*this->rho*this->rho;
+        //
+        float *y2 = new float[m];
+        float *x2 = new float[m];
+        for(int i=0;i<m;i++){
+            T yy = this->x[i]/sqrtf(this->lambda[i]);
+            y2[i] = this->alpha[i+1] - this->mu - this->phi*(this->alpha[i] - this->mu);
+            x2[i] = yy*exp(-0.5*this->alpha[i]);
+        }
+        //
+        float a11 = 0.0;
+        float a12 = 0.0;
+        for(int i=0;i<m;i++){
+            a11 += x2[i]*x2[i];
+            a12 += x2[i]*y2[i];
+        }
+        float mpsi = (a12/a11);
+        float spsi = sqrtf(Omega/a11);
+        //
+        psi = mpsi + spsi*this->random->normal();
+        //
+        float rss = 0.0;
+        for(int i=0;i<m;i++){
+            float temp =  y2[i] - psi*x2[i];
+            rss += temp*temp;
+        }
+        Omega = 1.0/this->random->gamma(0.5*(double)m, 0.5*rss);
+        delete[] y2;
+        delete[] x2;
+        this->sigma = sqrtf(Omega + psi*psi);
+        this->rho = psi/this->sigma;
+        //
+        //
+        T *err3 = new T[this->n];
+        for(int i=0;i<this->n;i++){
+            err3[i] = this->x[i]*exp(-0.5*this->alpha[i]);
+        }
+        Stats<T> *stats = new Stats<T>(err3,this->n);
+        stats->setSeed(this->random->rand());
+        this->nu = stats->sampletstudentdf(3,60);
+        delete[] err3;
+        delete stats;
+    }
+    //
+    //
+    //
     __host__ __device__ T simulatemu()
     {
         int m = this->n - 1;
@@ -351,6 +430,17 @@ public:
         return this->nu;
     }
     //
+    __host__ __device__ T getmu()
+    {
+        return this->mu;
+    }
+    //
+    //
+    __host__ __device__ T getphi()
+    {
+        return this->phi;
+    }
+    //
     //
     __host__ __device__ T getsigma()
     {
@@ -361,6 +451,12 @@ public:
     __host__ __device__ T getrho()
     {
         return this->rho;
+    }
+    //
+    //
+    __host__ __device__ int getnu()
+    {
+        return this->nu;
     }
     //
     //
