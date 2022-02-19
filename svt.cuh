@@ -211,7 +211,7 @@ public:
         }
     }
     //
-    void simulateparameters()
+    __host__ __device__ void simulateparameters()
     {
         int m = this->n - 1;
         T num = 0.0;
@@ -257,22 +257,22 @@ public:
         delete stats;
     }
     //
-    T getmu()
+    __host__ __device__ T getmu()
     {
         return this->mu;
     }
     //
-    T getphi()
+    __host__ __device__ T getphi()
     {
         return this->phi;
     }
     //
-    T getsigma()
+    __host__ __device__ T getsigma()
     {
         return this->sigma;
     }
     //
-    int getnu()
+    __host__ __device__ int getnu()
     {
         return this->nu;
     }
