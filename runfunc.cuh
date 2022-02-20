@@ -605,4 +605,27 @@ void estimate_svt_gpu(const char *file)
     printf("Done ... \n");
 }
 //
+//
+void test()
+{
+    printf("Start estimating .... \n");
+    int n;
+    float *xi = readArray<float>("sp500_ret_80_87.txt",&n);
+    //
+    float *x;
+    cudaMallocManaged(&x,n*sizeof(float));
+    for(int i=0;i<n;i++) x[i] = xi[i];
+    SVModel<float> *models;
+    cudaMallocManaged(&models,16*sizeof(SVModel<float>));
+    for(int i=0;i<10;i++){
+        models[i] = SVModel<float>(x,n,-0.5,0.97,0.2);
+    }
+    svkernel<<<32,8>>>(models,16);
+    cudaDeviceSynchronize();
+
+    cudaFree(models);
+    cudaFree(x);
+    free(xi);    
+}
+//
 #endif

@@ -207,6 +207,16 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
   }
 }
 
+__global__ void svkernel(SVModel<float> *model,int niter)
+{
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  if(idx < niter)
+  {
+    (model[idx]).simulatestates();
+    printf("Hello\n");
+  }
+}
+
 
 
 #endif

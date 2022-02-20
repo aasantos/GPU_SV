@@ -35,13 +35,11 @@ protected:
     //
     bool mudiffuse;
     bool phidiffuse;
-    //bool sigmadiffuse;
     //
     int phipriortype; // 0 normal; 1 beta
     //
     T muprior[2];
     T phiprior[2];
-    //T sigmaprior[2];
     //
     unsigned int seed;
     Random<T> *random;
@@ -182,14 +180,16 @@ public:
       double t5 = -0.5*((double)this->nu)/lt;
       return t1 + t2 + t3 + t4 + t5;
     }
-
+    //
+    //
     __host__ __device__ double logpdf2(double lt,double yy,double a)
     {
       double t1 = -1.0*(0.5*((double)this->nu +1) + 1.0)*logf(lt);
       double t2 = -0.5*((double)this->nu + yy*yy*expf(-1.0*a))/lt;
       return t1 + t2;
     }
-
+    //
+    //
     __host__ __device__ double metroproblambda(double lt1,double lt0,double yy,double a,double a1)
     {
       double lpdf1 = logpdf1(lt1, yy, a, a1);
@@ -204,6 +204,7 @@ public:
             return exp(tt);
       }
     }
+    //
     //
     __host__ __device__ void simulatestates()
     {
@@ -255,6 +256,7 @@ public:
             }
         }
     }
+    //
     //
     //
     __host__ __device__ void simulateparameters()
@@ -333,6 +335,7 @@ public:
         delete[] err3;
         delete stats;
     }
+    //
     //
     //
     //
