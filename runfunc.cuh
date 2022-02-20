@@ -615,13 +615,15 @@ void test()
     float *x;
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
+    //
+    int niter = 16;
     SVModel<float> *models;
-    cudaMallocManaged(&models,16*sizeof(SVModel<float>));
-    for(int i=0;i<10;i++){
+    cudaMallocManaged(&models,niter*sizeof(SVModel<float>));
+    for(int i=0;i<niter;i++){
         models[i] = SVModel<float>(x,n,-0.5,0.97,0.2);
     }
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
-    svkernel<<<32,8>>>(models,16);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
+    svkernel<<<32,8>>>(models,niter);
     cudaDeviceSynchronize();
 
     cudaFree(models);

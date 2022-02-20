@@ -212,8 +212,12 @@ __global__ void svkernel(SVModel<float> *model,int niter)
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    (model[idx]).simulatestates();
-    printf("Hello\n");
+    for(int i=0;i<50;i++) (model[idx]).simulatestates();
+    for(int i=0;i<100;i++){
+      (model[idx]).simulatestates();
+      (model[idx]).simulateparameters();
+    }
+    printf("%.4f %.4f %.4f\n",(model[idx]).getmu(),(model[idx]).getphi(),(model[idx]).getsigma());
   }
 }
 
