@@ -620,11 +620,13 @@ void test()
     for(int i=0;i<10;i++){
         models[i] = SVModel<float>(x,n,-0.5,0.97,0.2);
     }
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
     svkernel<<<32,8>>>(models,16);
     cudaDeviceSynchronize();
 
     cudaFree(models);
     cudaFree(x);
+    cudaDeviceReset();
     free(xi);    
 }
 //
