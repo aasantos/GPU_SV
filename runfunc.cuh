@@ -447,6 +447,7 @@ void estimate_svl_gpu(const char *file)
     //
     double time_spent = 0.0;
     clock_t begin = clock();
+
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
     kernel_svl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
@@ -511,6 +512,7 @@ void estimate_svtl_gpu(const char *file)
     //
     double time_spent = 0.0;
     clock_t begin = clock();
+    
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,10485760000L);
     kernel_svtl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,nusimul,niter);
     cudaDeviceSynchronize();
@@ -603,33 +605,6 @@ void estimate_svt_gpu(const char *file)
     //
     free(xi);
     printf("Done ... \n");
-}
-//
-//
-void test()
-{
-    printf("Start estimating .... \n");
-    int n;
-    float *xi = readArray<float>("sp500_ret_80_87.txt",&n);
-    //
-    float *x;
-    cudaMallocManaged(&x,n*sizeof(float));
-    for(int i=0;i<n;i++) x[i] = xi[i];
-    //
-    int niter = 16;
-    SVModel<float> *models;
-    cudaMallocManaged(&models,niter*sizeof(SVModel<float>));
-    for(int i=0;i<niter;i++){
-        models[i] = SVModel<float>(x,n,-0.5,0.97,0.2);
-    }
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize,524288000L);
-    svkernel<<<32,8>>>(models,niter);
-    cudaDeviceSynchronize();
-
-    cudaFree(models);
-    cudaFree(x);
-    cudaDeviceReset();
-    free(xi);    
 }
 //
 #endif

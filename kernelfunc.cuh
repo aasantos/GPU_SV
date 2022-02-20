@@ -89,8 +89,8 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
     delete model;
   }
 }
-
-
+//
+//
 __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *phis,float *sigmas,float *rhos,int niter)
 {
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
@@ -110,7 +110,6 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
       model->simulatestates();
     }
     //
-    //
     // warmup
     for(int i=0;i<nwarmup;i++){ 
       model->simulatestates();
@@ -118,8 +117,6 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
       model->simulatephi();
       model->simulatesigmarho();
     }
-    //printf("end states adaptation gpu ...\n ");
-    
     //
     mus[idx] = model->simulatemu();
     phis[idx] = model->simulatephi();
@@ -206,17 +203,6 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
     delete model;
   }
 }
-
-__global__ void svkernel(SVModel<float> *model,int niter)
-{
-  int idx = blockDim.x*blockIdx.x + threadIdx.x;
-  if(idx < niter)
-  {
-    (model[idx]).simulatestates();
-    printf("Hello %.3f\n",(model[idx]).getphi());
-  }
-}
-
 
 
 #endif

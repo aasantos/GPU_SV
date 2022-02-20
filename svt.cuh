@@ -207,7 +207,6 @@ public:
                 float t2 = 0.5*this->x[i]*this->x[i]/exp(this->alpha[i]) + 0.5*(T)this->nu;
                 this->lambda[i] = 1.0/this->random->gamma(t1,t2);
             }
-            
         }
     }
     //
