@@ -387,7 +387,7 @@ void estimate_sv_gpu(const char *file)
     clock_t begin = clock();
     //
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
-    kernel_sv<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
+    kernel_sv<<<128,64>>>(x,n,seed,musimul,phisimul,sigmasimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -449,7 +449,7 @@ void estimate_svl_gpu(const char *file)
     clock_t begin = clock();
 
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,2097152000L);
-    kernel_svl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
+    kernel_svl<<<128,64>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -492,7 +492,7 @@ void estimate_svtl_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 5000;
+    int niter = 1000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -514,7 +514,7 @@ void estimate_svtl_gpu(const char *file)
     clock_t begin = clock();
     
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,10485760000L);
-    kernel_svtl<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,nusimul,niter);
+    kernel_svtl<<<32,32>>>(x,n,seed,musimul,phisimul,sigmasimul,rhosimul,nusimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
@@ -557,7 +557,7 @@ void estimate_svt_gpu(const char *file)
     cudaMallocManaged(&x,n*sizeof(float));
     for(int i=0;i<n;i++) x[i] = xi[i];
     //
-    int niter = 5000;
+    int niter = 1000;
     float *musimul;
     float *phisimul;
     float *sigmasimul;
@@ -576,7 +576,7 @@ void estimate_svt_gpu(const char *file)
     double time_spent = 0.0;
     clock_t begin = clock();
     cudaDeviceSetLimit(cudaLimitMallocHeapSize,10485760000L);
-    kernel_svt<<<1024,8>>>(x,n,seed,musimul,phisimul,sigmasimul,nusimul,niter);
+    kernel_svt<<<32,32>>>(x,n,seed,musimul,phisimul,sigmasimul,nusimul,niter);
     cudaDeviceSynchronize();
     //
     float mmu = Vector<float>(musimul,niter).mean();
