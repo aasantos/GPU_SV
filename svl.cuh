@@ -41,6 +41,9 @@ protected:
     unsigned int seed;
     Random<T> *random;
     //
+    double timenewton;
+    double timesimulatestates;
+    double timesimulateparameters;
     //
 public:
     __host__ __device__ SVLModel(T *x,int n,T mu,T phi,T sigma,T rho)
@@ -61,6 +64,11 @@ public:
         this->phiprior[0] = 0.9; this->phiprior[1] = 1.0;
         this->seed = 79798;
         this->random = new Random<T>(this->seed);
+        //
+        this->timenewton = 0.0;
+        this->timesimulatestates = 0.0;
+        this->timesimulateparameters = 0.0;
+        //
     }
     //
     __host__ __device__ ~SVLModel()
@@ -102,6 +110,7 @@ public:
     //
     __host__ __device__ T newton(T yy,T yy0,T a0,T a1)
     {
+        clock_t begin = clock();
         T x0 = 0.5*(a0 + a1);
         T g = df(yy,yy0,a0,x0,a1);
         int iter = 0;
@@ -111,6 +120,8 @@ public:
             g = df(yy,yy0,a0,x0,a1);
             iter++;
         }
+        clock_t end = clock();
+        this->timenewton += (double)(end - begin) / CLOCKS_PER_SEC;
         return x0;
     }
     //
@@ -161,6 +172,7 @@ public:
     //
     __host__ __device__ void simulatestates()
     {
+        clock_t begin = clock();
         for(int i=0;i<this->n;i++){
             if(i==0){
               this->alpha[i] = this->random->normal(this->mu,this->sigma/sqrt(1.0 - this->phi*this->phi));
@@ -189,7 +201,11 @@ public:
                 }
             }
         }
+        clock_t end = clock();
+        this->timesimulatestates += (double)(end - begin) / CLOCKS_PER_SEC;
+
     }
+    //
     //
     //
     __host__ __device__ T simulatemu()
@@ -265,6 +281,27 @@ public:
         delete[] x2;
         this->sigma = sqrtf(Omega + psi*psi);
         this->rho = psi/this->sigma;
+    }
+    //
+    __host__ __device__ void simulateparameters()
+    {
+        clock_t begin = clock();
+        this->mu = this->simulatemu();
+        this->phi = this->simulatephi();
+        this->simulatesigmarho();
+        clock_t end = clock();
+        this->timesimulateparameters += (double)(end - begin) / CLOCKS_PER_SEC;
+    }
+    //
+    //
+    __host__ __device__ T getmu()
+    {
+        return this->mu;
+    }
+    //
+    __host__ __device__ T getphi()
+    {
+        return this->phi;
     }
     //
     //
