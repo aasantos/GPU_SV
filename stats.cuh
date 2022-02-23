@@ -1,13 +1,13 @@
 #ifndef stats_cuh
 #define stats_cuh
-
-
+//
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "random.cuh"
-
-
+//
+//
 template <typename T>
 class Stats{
 protected:
@@ -91,7 +91,7 @@ public:
         T temp1 = lgamma(0.5*((T)df + 1.0));
         T temp2 = lgamma(0.5*(T)df);
         T temp3 = 0.5*log((T)df*3.141592653589793);
-        T temp4 = 0.5*((T)df + 1.0)*log(1.0 + pow(x, 2.0)/(T)df);
+        T temp4 = 0.5*((T)df + 1.0)*log(1.0 + (x*x)/(T)df);
         return temp1 - temp2 - temp3 - temp4;
     }
     //
@@ -209,6 +209,45 @@ public:
         delete[] w;
         return dft;
     }
+    //
+    __host__ __device__ T sumlogpdfstudentt(int df)
+    {
+        T temp1 = ((T)this->n)*lgamma(0.5*((T)df + 1.0));
+        T temp2 = ((T)this->n)*lgamma(0.5*(T)df);
+        T temp3 = ((T)this->n)*0.5*log((T)df*3.141592653);
+        T temp4 = 0.0;
+        for(int i=0;i<this->n;i++) temp4 += logf(1.0 + (this->x[i]*this->x[i])/(T)df);
+        temp4 *= 0.5*((T)df + 1.0);
+        return temp1 - temp2 - temp3 - temp4;
+    }
+
+    __host__ __device__ int rt()
+    {
+        int m = 47;
+        float *w = new float[m];
+        for(int i=0;i<m;i++) w[i] = this->sumlogpdfstudentt(i+3);
+        float *z = new float[m];
+        for(int i=0;i<m;i++){
+            T sumt = 0.0;
+            for(int j=0;j<m;j++){
+                sumt += expf(w[j] - w[i]);
+            }
+            z[i] = 1.0/sumt;
+        }
+        float u = this->random->uniform();
+        float sumz = 0.0;
+        int iter = 0;
+        int df = 2;
+        while(sumz < u){
+            sumz += z[iter];
+            df++;
+            iter++;
+        }
+        delete[] w;
+        delete[] z;
+        return df;
+    }
+
     //
     __host__ __device__ void setSeed(unsigned int seed)
     {

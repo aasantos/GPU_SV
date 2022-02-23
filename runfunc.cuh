@@ -608,4 +608,160 @@ void estimate_svt_gpu(const char *file)
     printf("Done ... \n");
 }
 //
+//
+/*
+void estimate_svl_test(const char *file)
+{
+    int n;
+    float *x = readArray<float>(file,&n);
+    printf("Number of observations: %d\n",n);
+    //
+    int nwarmup = 5000;
+    int niter = 20000;
+    //
+    float mu = -0.5;
+    float phi = 0.97;
+    float sigma = 0.2;
+    float rho = -0.5;
+    //
+    SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulateparameters();
+    }
+    //
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    float *rhosimul = new float[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        model->simulateparameters();
+        musimul[i] = model->getmu();
+        phisimul[i] = model->getphi();
+        sigmasimul[i] = model->getsigma();
+        rhosimul[i] = model->getrho();
+    }
+    //
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mrho = Vector<float>(rhosimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f; rho: %.3f\n",mmu,mphi,msigma,mrho);
+    printf("newton: %.3f\n",model->gettimenewton());
+    printf("states: %.3f\n",model->gettimestates());
+    printf("parameters: %.3f\n",model->gettimeparameters());
+    //
+    //
+    FILE *fp;
+    fp = fopen("svlestim.txt", "wa");
+    fprintf(fp,"mu phi sigma rho\n");
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %.4f\n",musimul[i],phisimul[i],sigmasimul[i],rhosimul[i]);
+    fclose(fp);
+    //
+    //
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete[] rhosimul;
+    delete model;
+  free(x);
+}
+//
+//
+void estimate_svt_test(const char *file)
+{
+    int n;
+    float *x = readArray<float>(file,&n);
+    printf("Number of observations: %d\n",n);
+    //
+    int nwarmup = 5000;
+    int niter = 20000;
+    //
+    float mu = -0.5;
+    float phi = 0.97;
+    float sigma = 0.2;
+    int nu = 10;
+
+    //
+    SVTModel<float> *model = new SVTModel<float>(x,n,mu,phi,sigma,nu);
+    //
+    for(int i=0;i<500;i++){
+        model->simulatestates();
+    }
+    //
+    // warmup
+    for(int i=0;i<nwarmup;i++){
+        if(i%100 == 0){
+            printf("Warmup Iteration: %d/%d\n",i,nwarmup);
+        }
+        model->simulatestates();
+        model->simulateparameters();
+    }
+    //
+    //
+    float *musimul = new float[niter];
+    float *phisimul = new float[niter];
+    float *sigmasimul = new float[niter];
+    int *nusimul = new int[niter];
+    //
+    //
+    for(int i=0;i<niter;i++){
+        if(i%100 == 0){
+            printf("Iteration: %d/%d\n",i,niter);
+        }
+        model->simulatestates();
+        model->simulateparameters();      
+        musimul[i] = model->getmu();
+        phisimul[i] = model->getphi();
+        sigmasimul[i] = model->getsigma();
+        nusimul[i] = model->getnu();
+    }
+    //
+    //
+    float mmu = Vector<float>(musimul,niter).mean();
+    float mphi = Vector<float>(phisimul,niter).mean();
+    float msigma = Vector<float>(sigmasimul,niter).mean();
+    float mnu = Vector<int>(nusimul,niter).mean();
+    //
+    printf("mu: %.3f; phi: %.3f; sigma: %.3f; nu: %.3f\n",mmu,mphi,msigma,mnu);
+    printf("newton: %.3f\n",model->gettimenewton());
+    printf("states: %.3f\n",model->gettimestates());
+    printf("parameters: %.3f\n",model->gettimeparameters());
+    //
+    //
+    FILE *fp;
+    fp = fopen("svtestim.txt", "wa");
+    fprintf(fp,"mu phi sigma nu\n");
+    for(int i=0;i<niter;i++) fprintf(fp,"%.4f %.4f %.4f %d\n",musimul[i],phisimul[i],sigmasimul[i],nusimul[i]);
+    fclose(fp);
+    //
+    delete[] musimul;
+    delete[] phisimul;
+    delete[] sigmasimul;
+    delete[] nusimul;
+    //
+    delete model;
+  free(x);
+}
+//
+*/
+//
 #endif

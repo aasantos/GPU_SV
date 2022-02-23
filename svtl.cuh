@@ -331,7 +331,8 @@ public:
         }
         Stats<T> *stats = new Stats<T>(err3,this->n);
         stats->setSeed(this->random->rand());
-        this->nu = stats->sampletstudentdf(3,60);
+        //this->nu = stats->sampletstudentdf(3,60);
+        this->nu = stats->rt();
         delete[] err3;
         delete stats;
     }

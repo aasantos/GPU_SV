@@ -50,6 +50,9 @@ protected:
     unsigned int seed;
     Random<T> *random;
     //
+    //double timenewton;
+    //double timesimulatestates;
+    //double timesimulateparameters;
     //
 public:
     __host__ __device__ SVTModel(T *x,int n,T mu,T phi,T sigma,int nu)
@@ -78,6 +81,10 @@ public:
         this->sigmaprior[0] = 2.5; this->sigmaprior[1] = 0.025;
         this->seed = 79798;
         this->random = new Random<T>(this->seed);
+        //
+        //this->timenewton = 0.0;
+        //this->timesimulatestates = 0.0;
+        //this->timesimulateparameters = 0.0;
     }
     //
     __host__ __device__ ~SVTModel()
@@ -109,6 +116,7 @@ public:
     //
     __host__ __device__ T newton(T yy,T a0,T a1)
     {
+        //clock_t begin = clock();
         T x0 = 0.5*(a0 + a1);
         T g = df(yy,a0,x0,a1);
         int iter = 0;
@@ -118,6 +126,8 @@ public:
             g = df(yy,a0,x0,a1);
             iter++;
         }
+        //clock_t end = clock();
+        //this->timenewton += (double)(end - begin) / CLOCKS_PER_SEC;
         return x0;
     }
     //
@@ -166,6 +176,7 @@ public:
     //
     __host__ __device__ void simulatestates()
     {
+        //clock_t begin = clock();
         for(int i=0;i<this->n;i++){
             T lam = this->lambda[i];
             T yy = this->x[i]/sqrtf(lam);
@@ -208,10 +219,13 @@ public:
                 this->lambda[i] = 1.0/this->random->gamma(t1,t2);
             }
         }
+        //clock_t end = clock();
+        //this->timesimulatestates += (double)(end - begin) / CLOCKS_PER_SEC;
     }
     //
     __host__ __device__ void simulateparameters()
     {
+        //clock_t begin = clock();
         int m = this->n - 1;
         T num = 0.0;
         T den = 0.0;
@@ -249,11 +263,16 @@ public:
         for(int i=0;i<this->n;i++){
             err[i] = this->x[i]*exp(-0.5*this->alpha[i]);
         }
+        //
         Stats<T> *stats = new Stats<T>(err,this->n);
         stats->setSeed(this->random->rand());
-        this->nu = stats->sampletstudentdf(3,60);
-        delete[] err;
+        //this->nu = stats->sampletstudentdf(3,60);
+        this->nu = stats->rt();
         delete stats;
+        delete[] err;
+        //
+        //clock_t end = clock();
+        //this->timesimulateparameters += (double)(end - begin) / CLOCKS_PER_SEC;
     }
     //
     __host__ __device__ T getmu()
@@ -383,6 +402,24 @@ public:
         this->seed = ss;
         this->random = new Random<T>(seed);
     }
+    //
+    //
+    /*
+    __host__ __device__ double gettimenewton()
+    {
+        return this->timenewton;
+    }
+    //
+    __host__ __device__ double gettimestates()
+    {
+        return this->timesimulatestates;
+    }
+    //
+    __host__ __device__ double gettimeparameters()
+    {
+        return this->timesimulateparameters;
+    }
+    */
 };
 
 

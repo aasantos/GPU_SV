@@ -24,13 +24,31 @@ int main(int argc,char **argv)
   //estimate_svt("sp500_ret_80_87.txt",-0.5,0.95,0.2,20);
   //estimate_svl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5);
   //estimate_svtl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5,20);
+
   int flag = atoi(argv[1]);
   if(flag == 0) estimate_sv_gpu("sp500_ret_80_87.txt");
   if(flag == 1) estimate_svl_gpu("sp500_ret_80_87.txt");
   if(flag == 2) estimate_svtl_gpu("sp500_ret_80_87.txt");
   if(flag == 3) estimate_svt_gpu("sp500_ret_80_87.txt");
   //
-  printf("Done ... \n");
+  /*
+  double time_elapsed = 0.0;
+  clock_t begin = clock();
+  estimate_svl_test("sp500_ret_80_87.txt");
+  clock_t end = clock();
+  time_elapsed += (double)(end - begin) / CLOCKS_PER_SEC;
+  printf("Running time: %.3f\n",time_elapsed);
+  */
   //
+  /*
+  double time_elapsed = 0.0;
+  clock_t begin = clock();
+  estimate_svt_test("sp500_ret_80_87.txt");
+  clock_t end = clock();
+  time_elapsed += (double)(end - begin) / CLOCKS_PER_SEC;
+  printf("Running time: %.3f\n",time_elapsed);
+  */
+  //
+  printf("Done ... \n");
   return 0;
 }
