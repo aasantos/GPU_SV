@@ -64,7 +64,7 @@ __global__ void kernel_sv(float *x,int n,unsigned int *seed,float *mus,float *ph
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2500;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -96,7 +96,7 @@ __global__ void kernel_svl(float *x,int n,unsigned int *seed,float *mus,float *p
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2500;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -134,7 +134,7 @@ __global__ void kernel_svt(float *x,int n,unsigned int *seed,float *mus,float *p
   int idx = blockDim.x*blockIdx.x + threadIdx.x;
   if(idx < niter)
   {
-    int nwarmup = 2500;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
@@ -172,7 +172,7 @@ __global__ void kernel_svtl(float *x,int n,unsigned int *seed,float *mus,float *
   {
     //
     //
-    int nwarmup = 2500;
+    int nwarmup = 5000;
     float mu = 0.0;
     float phi = 0.95;
     float sigma = 0.2;
