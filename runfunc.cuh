@@ -73,7 +73,7 @@ void estimate_sv(const char *file,float mu,float phi,float sigma)
     printf("Number of observations: %d\n",n);
     //
     int nwarmup = 5000;
-    int niter = 20000;
+    int niter = 100000;
     //
     SVModel<float> *model = new SVModel<float>(x,n,mu,phi,sigma);
     //
@@ -139,7 +139,7 @@ void estimate_svt(const char *file,float mu,float phi,float sigma,int nu)
     printf("Number of observations: %d\n",n);
     //
     int nwarmup = 5000;
-    int niter = 20000;
+    int niter = 100000;
     //
     SVTModel<float> *model = new SVTModel<float>(x,n,mu,phi,sigma,nu);
     //
@@ -210,7 +210,7 @@ void estimate_svl(const char *file,float mu,float phi,float sigma,float rho)
     printf("Number of observations: %d\n",n);
     //
     int nwarmup = 5000;
-    int niter = 20000;
+    int niter = 100000;
     //
     SVLModel<float> *model = new SVLModel<float>(x,n,mu,phi,sigma,rho);
     //
@@ -285,7 +285,7 @@ void estimate_svtl(const char *file,float mu,float phi,float sigma,float rho,int
     printf("Number of observations: %d\n",n);
     //
     int nwarmup = 5000;
-    int niter = 20000;
+    int niter = 100000;
     //
     SVTLModel<float> *model = new SVTLModel<float>(x,n,mu,phi,sigma,rho,nu);
     //
