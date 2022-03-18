@@ -25,10 +25,10 @@ int main(int argc,char **argv)
   estimate_svl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5);
   estimate_svtl("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5,20);
   //
-  estimate_sv_gpu("sp500_ret_80_87.txt",-0.5,0.95,0.2);
-  estimate_svt_gpu("sp500_ret_80_87.txt",-0.5,0.95,0.2,20);
-  estimate_svl_gpu("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5);
-  estimate_svtl_gpu("sp500_ret_80_87.txt",-0.5,0.95,0.2,-0.5,20);
+  estimate_sv_gpu("sp500_ret_80_87.txt");
+  estimate_svt_gpu("sp500_ret_80_87.txt");
+  estimate_svl_gpu("sp500_ret_80_87.txt");
+  estimate_svtl_gpu("sp500_ret_80_87.txt");
 
   /*
   int flag = atoi(argv[1]);
