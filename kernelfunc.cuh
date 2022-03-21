@@ -15,47 +15,10 @@
 #include "normalmodel.cuh"
 #include "regmodel.cuh"
 #include "ar1model.cuh"
-#include "dlm.cuh"
 #include "sv.cuh"
 #include "svt.cuh"
 #include "svl.cuh"
 #include "svtl.cuh"
-
-
-__global__ void kernel_dlm(float *x,int n,unsigned int *seed,float *sigmavs,float *mus,float *phis,float *sigmas,int niter)
-{
-  int idx = blockDim.x*blockIdx.x + threadIdx.x;
-  if(idx < niter)
-  {
-    int nwarmup = 5000;
-    float sigmav = 0.2;
-    float mu = 0.0;
-    float phi = 0.95;
-    float sigma = 0.2;
-    //
-    DLMModel<float> *model = new DLMModel<float>(x,n,sigmav,mu,phi,sigma);
-    model->setseed(seed[idx]);
-    //
-    for(int i=0;i<100;i++){
-      model->simulatestates();
-    }
-    // warmup
-    for(int i=0;i<nwarmup;i++){ 
-      model->simulatestates();
-      model->simulatesigmav();
-      model->simulatemu();
-      model->simulatephi();
-      model->simulatesigma();
-    }
-    //
-    sigmavs[idx] = model->simulatesigmav();
-    mus[idx] = model->simulatemu();
-    phis[idx] = model->simulatephi();
-    sigmas[idx] = model->simulatesigma();
-    //
-    delete model;
-  }
-}
 
 
 
