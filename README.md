@@ -59,3 +59,6 @@ indicates the type of model estimated and if the GPU is used,
 the tag gpu is added. For example, after estimating the SVTL-GPU (7) model, 
 the file svtlestimgpu.txt is created. 
 
+The code was tested on a NVIDIA Tesla P100 GPU device, and further adaptations may 
+be need if a different device is used. 
+
