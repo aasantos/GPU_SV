@@ -16,7 +16,7 @@ The application can be complied just using:
 nvcc main.cu -o programApp
 
 
-To run the application, two inputs are needed, first, the raw text file with returns; 
+To run the application, two inputs are needed, first, the raw text file with the returns; 
 in this repository exists one associated with the S&P500 index daily returns 
 form 1980 to 1987 (sp500_ret_80_87.txt). Second a code indicating the model 
 to be estimated and if CPU or GPU is used
