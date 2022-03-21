@@ -40,7 +40,7 @@ to be estimated and if CPU or GPU is used
 
 A given set of parameters is assumed, i.e., number of iterations, burnin iterations 
 and initial values for the parameters. Any desired modification, 
-at this stage must me done within the original code.
+at this stage, must me done within the original code.
 
 Examples: 
 
@@ -54,5 +54,8 @@ Estimating the SVTL model in parallel using GPU
 ./programApp sp500_ret_80_87.txt 7
 
 
-The output of the analysis is saved on a .txt file whose name indicates the type of model estimated and when GPU is used, the tag gpu is added.
+The output of the analysis is saved on a .txt file whose name 
+indicates the type of model estimated and when GPU is used, 
+the tag gpu is added. For example, after estimating the SVTL-GPU (7) model, 
+the file svtlestimgpu.txt is created. 
 
