@@ -1,6 +1,6 @@
 # GPU_SV
 
-Implements sequential and parallel computing for estimating for types
+Implements sequential and parallel computing four estimating for types
 of stochastic volatility (SV) models
 
 The basic SV
