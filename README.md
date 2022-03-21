@@ -3,7 +3,7 @@
 Implements sequential and parallel computing four estimating for types
 of stochastic volatility (SV) models
 
-The basic SV
+SV basic
 
 SV with leverage (SVL)
 
